@@ -19,7 +19,6 @@ The recommended setup for this project is:
 Install:
 
 - XAMPP **or** WAMP
-- Composer
 - Git
 - VS Code (recommended)
 
@@ -31,12 +30,6 @@ Check PHP:
 php -v
 ```
 
-Check Composer:
-
-```bash
-composer -V
-```
-
 ---
 
 # 2. Download / Clone the Project
@@ -44,7 +37,7 @@ composer -V
 Clone the GitHub repository:
 
 ```bash
-git clone https://github.com/janagan2k04-2/together-thrives.git
+git clone https://github.com/janagan2k04/together-thrives.git
 ```
 
 You can also download the repository as a ZIP from GitHub and extract it.
@@ -144,29 +137,13 @@ For WAMP:
 cd C:\wamp64\www\tt
 ```
 
-Run:
-
-```bash
-composer install
-```
-
-This installs the PHP packages required by the project.
-
 ---
 
 # 7. Create the `.env` File
 
-The `.env` file contains local configuration such as database credentials.
-
 If the repository contains `.env.example`, create `.env` from it.
 
-### Windows Command Prompt
-
-```bash
-copy .env.example .env
-```
-
-Do **not** upload `.env` to GitHub.
+The `.env` file contains local configuration such as database credentials.
 
 ---
 
@@ -236,10 +213,17 @@ DB_DATABASE=togetherthrives
 # 11. Import the Database Schema
 
 
-Look inside the project for a `.sql` file:
+Look inside the project for a `.sql` files:
 ```text
 database/
     schema.sql
+
+database/migrations
+    2026_......sql
+
+database/seeds
+    seed.sql
+    
 ```
 
 
@@ -251,6 +235,8 @@ In phpMyAdmin:
 4. Select the project's `.sql` schema file.
 5. Click **Import / Go**.
 6. Wait until phpMyAdmin confirms that the import was successful.
+
+Import all sql files one by one.
 
 After importing, the database tables should appear under:
 
@@ -319,12 +305,6 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-
-### Install dependencies
-
-```bash
-composer install
-```
 
 # 14. Git Setup for Group Members
 
