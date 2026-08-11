@@ -1,0 +1,126 @@
+[2026-08-07 21:41:46] AUDIT: User 1 (admin) logged in
+[2026-08-07 21:42:44] AUDIT: User 1 logged out
+[2026-08-07 21:43:07] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:44:30] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:45:00] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:49:59] AUDIT: User 1 (admin) logged in
+[2026-08-07 21:50:00] AUDIT: User 1 logged out
+[2026-08-07 21:55:43] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:56:58] AUDIT: User 1 (admin) logged in
+[2026-08-07 21:56:59] AUDIT: User 1 logged out
+[2026-08-07 22:53:48] AUDIT: Community account 3 registered (nimal@test.lk)
+[2026-08-07 22:54:12] AUDIT: User 3 (community) logged in
+[2026-08-07 22:55:33] AUDIT: organization account 4 registered (hope@test.lk) — awaiting verification
+[2026-08-07 22:58:08] AUDIT: grama_niladhari account 5 registered (sunil@test.lk) — awaiting verification
+[2026-08-07 22:58:08] AUDIT: blood_bank account 6 registered (bank@test.lk) — awaiting verification
+[2026-08-07 23:04:59] AUDIT: grama_niladhari account 8 registered (kamala@test.lk) — awaiting verification
+[2026-08-07 23:29:40] AUDIT: grama_niladhari account 9 registered (ruwan@test.lk) — awaiting verification
+[2026-08-07 23:36:13] AUDIT: Community account 10 registered (dilani@test.lk)
+[2026-08-07 23:36:49] AUDIT: User 10 (community) logged in
+[2026-08-09 01:24:02] AUDIT: User 1 (admin) logged in
+[2026-08-10 17:18:02] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-10 17:18:20] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-10 17:18:25] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-11 14:51:40] AUDIT: User 1 (admin) logged in
+[2026-08-11 14:54:10] AUDIT: organization account 2 registered (hope@test.lk) — awaiting verification
+[2026-08-11 14:54:11] AUDIT: grama_niladhari account 3 registered (sunil@test.lk) — awaiting verification
+[2026-08-11 14:54:11] AUDIT: blood_bank account 4 registered (bank@test.lk) — awaiting verification
+[2026-08-11 14:54:12] AUDIT: Community account 5 registered (dilani@test.lk)
+[2026-08-11 14:54:25] AUDIT: User 1 (admin) logged in
+[2026-08-11 14:54:45] AUDIT: Admin 1 approved organization account 2 (hope@test.lk)
+[2026-08-11 14:54:46] AUDIT: User 2 (organization) logged in
+[2026-08-11 14:55:09] AUDIT: Admin 1 rejected blood_bank account 4 (bank@test.lk)
+[2026-08-11 14:55:10] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 14:56:12] AUDIT: User 5 (community) logged in
+[2026-08-11 15:00:20] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:00:54] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:00:56] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:00:58] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:01:00] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:02:01] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:05:38] AUDIT: Blocked login for bank@test.lk — status rejected
+[2026-08-11 15:05:39] AUDIT: Blocked login for sunil@test.lk — status pending
+[2026-08-11 15:05:39] AUDIT: User 2 (organization) logged in
+[2026-08-11 15:05:40] AUDIT: User 5 (community) logged in
+[2026-08-11 15:05:41] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:06:02] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:06:03] AUDIT: Admin 1 suspended account 2 (hope@test.lk)
+[2026-08-11 15:06:03] AUDIT: Blocked login for hope@test.lk — status suspended
+[2026-08-11 15:06:04] AUDIT: Admin 1 reinstated account 2 (hope@test.lk)
+[2026-08-11 15:06:05] AUDIT: User 2 (organization) logged in
+[2026-08-11 15:06:06] AUDIT: User 5 (community) logged in
+[2026-08-11 15:06:47] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:13:07] AUDIT: Blocked login for bank@test.lk — status rejected
+[2026-08-11 15:13:08] AUDIT: Blocked login for sunil@test.lk — status pending
+[2026-08-11 15:13:08] AUDIT: User 2 (organization) logged in
+[2026-08-11 15:13:09] AUDIT: User 5 (community) logged in
+[2026-08-11 15:13:10] AUDIT: User 1 (admin) logged in
+[2026-08-11 15:18:04] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:23:00] AUDIT: User 1 logged out
+[2026-08-11 16:31:03] AUDIT: Password reset requested for account 5 (dilani@test.lk)
+[2026-08-11 16:31:29] AUDIT: Password reset completed for account 5 (dilani@test.lk)
+[2026-08-11 16:31:57] AUDIT: Failed login for dilani@test.lk from ::1
+[2026-08-11 16:31:58] AUDIT: User 5 (community) logged in
+[2026-08-11 16:31:59] AUDIT: Failed login for dilani@test.lk from ::1
+[2026-08-11 16:32:00] AUDIT: User 5 (community) logged in
+[2026-08-11 16:33:00] AUDIT: Community account 6 registered (verify@test.lk)
+[2026-08-11 16:33:19] AUDIT: Email confirmed for account 6 (verify@test.lk)
+[2026-08-11 16:33:21] AUDIT: organization account 7 registered (verifyorg@test.lk) — awaiting verification
+[2026-08-11 16:33:21] AUDIT: Email confirmed for account 7 (verifyorg@test.lk)
+[2026-08-11 16:33:40] AUDIT: Password reset requested for account 6 (verify@test.lk)
+[2026-08-11 16:33:40] AUDIT: Password reset requested for account 6 (verify@test.lk)
+[2026-08-11 16:33:41] AUDIT: Password reset requested for account 6 (verify@test.lk)
+[2026-08-11 16:33:42] AUDIT: Password reset requested for account 6 (verify@test.lk)
+[2026-08-11 16:33:42] AUDIT: Password reset requested for account 6 (verify@test.lk)
+[2026-08-11 16:33:43] AUDIT: Password reset throttled for account 6 (verify@test.lk)
+[2026-08-11 16:33:43] AUDIT: Password reset throttled for account 6 (verify@test.lk)
+[2026-08-11 16:34:12] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:34:12] AUDIT: User 2 (organization) logged in
+[2026-08-11 16:34:13] AUDIT: User 5 (community) logged in
+[2026-08-11 16:34:14] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:34:33] AUDIT: Password reset requested for account 5 (dilani@test.lk)
+[2026-08-11 16:34:33] AUDIT: Password reset requested for account 5 (dilani@test.lk)
+[2026-08-11 16:36:49] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:36:49] AUDIT: Admin 1 approved grama_niladhari account 3 (sunil@test.lk)
+[2026-08-11 16:36:49] AUDIT: Admin 1 reinstated account 4 (bank@test.lk)
+[2026-08-11 16:36:50] AUDIT: User 5 (community) logged in
+[2026-08-11 16:36:51] AUDIT: User 2 (organization) logged in
+[2026-08-11 16:36:52] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-11 16:36:52] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:37:11] AUDIT: User 5 (community) logged in
+[2026-08-11 16:37:12] AUDIT: User 2 (organization) logged in
+[2026-08-11 16:37:12] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-11 16:37:13] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:37:14] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:37:36] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:37:48] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:39:27] AUDIT: User 5 (community) logged in
+[2026-08-11 16:39:30] AUDIT: User 2 (organization) logged in
+[2026-08-11 16:39:31] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-11 16:39:33] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:39:34] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:51:39] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:52:30] AUDIT: User 5 (community) logged in
+[2026-08-11 16:52:32] AUDIT: User 2 (organization) logged in
+[2026-08-11 16:52:33] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-11 16:52:35] AUDIT: User 4 (blood_bank) logged in
+[2026-08-11 16:52:36] AUDIT: User 1 (admin) logged in
+[2026-08-11 16:59:52] AUDIT: User 1 (admin) logged in
+[2026-08-11 17:24:32] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-11 17:55:28] AUDIT: User 5 (community) logged in
+[2026-08-11 17:55:29] AUDIT: Reuse item 1 listed by user 5
+[2026-08-11 17:56:08] AUDIT: User 5 (community) logged in
+[2026-08-11 17:56:09] AUDIT: User 2 (organization) logged in
+[2026-08-11 17:56:10] AUDIT: Reuse item 1 updated
+[2026-08-11 17:56:48] AUDIT: Request 1 raised by user 2 for item 1
+[2026-08-11 17:56:49] AUDIT: User 1 (admin) logged in
+[2026-08-11 17:56:49] AUDIT: Request 1 selected for item 1
+[2026-08-11 17:56:49] AUDIT: Item 1 handed over to user 2
+[2026-08-11 17:56:49] AUDIT: Reuse item 2 listed by user 5
+[2026-08-11 17:56:50] AUDIT: Reuse item 2 withdrawn
+[2026-08-11 17:58:55] AUDIT: Reuse item 2 relisted
+[2026-08-11 18:19:02] AUDIT: User 1 (admin) logged in
+[2026-08-11 18:19:26] AUDIT: Admin 1 approved grama_niladhari account 3 (sunil@test.lk)
+[2026-08-11 18:19:48] AUDIT: Admin 1 reinstated account 4 (bank@test.lk)
+[2026-08-11 18:20:06] AUDIT: User 1 logged out
+[2026-08-11 18:20:40] AUDIT: User 5 (community) logged in
