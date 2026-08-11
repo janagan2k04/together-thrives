@@ -26,14 +26,36 @@ return function (Router $r) {
         $r->post('/verification/{id}/approve', 'Admin\OrgVerificationController@approve', ['csrf']);
         $r->post('/verification/{id}/reject',  'Admin\OrgVerificationController@reject',  ['csrf']);
 
-        // still to be built — see app/controllers/Admin/PlaceholderController.php
-        $r->get('/suspended',     'Admin\PlaceholderController@suspended');
-        $r->get('/complaints',    'Admin\PlaceholderController@complaints');
-        $r->get('/announcements', 'Admin\PlaceholderController@announcements');
-        $r->get('/dengue',        'Admin\PlaceholderController@dengue');
-        $r->get('/admins',        'Admin\PlaceholderController@admins');
-        $r->get('/logs',          'Admin\PlaceholderController@logs');
-        $r->get('/analytics',     'Admin\PlaceholderController@analytics');
-        $r->get('/settings',      'Admin\PlaceholderController@settings');
+        /*
+         * The remaining eight sidebar screens, built in week 3 by Member 4.
+         * They used to point at Admin\PlaceholderController; that controller and
+         * its view are gone, as the comment at the top of this file asked.
+         * Nothing above this block changed.
+         */
+
+        // content moderation
+        $r->get('/suspended',          'Admin\ModerationController@suspended');
+        $r->get('/complaints',         'Admin\ModerationController@complaints');
+        $r->get('/complaints/{id}',    'Admin\ModerationController@complaint');
+        $r->post('/complaints/{id}/resolve', 'Admin\ModerationController@resolve', ['csrf']);
+
+        // announcements
+        $r->get('/announcements',           'Admin\AnnouncementController@index');
+        $r->get('/announcements/create',    'Admin\AnnouncementController@create');
+        $r->post('/announcements',          'Admin\AnnouncementController@store', ['csrf']);
+        $r->get('/announcements/{id}/edit', 'Admin\AnnouncementController@edit');
+        $r->put('/announcements/{id}',      'Admin\AnnouncementController@update', ['csrf']);
+
+        // dengue
+        $r->get('/dengue',  'Admin\DengueAlertController@index');
+        $r->post('/dengue', 'Admin\DengueAlertController@store', ['csrf']);
+
+        // system management
+        $r->get('/admins',    'Admin\SystemController@admins');
+        $r->post('/admins',   'Admin\SystemController@storeAdmin', ['csrf']);
+        $r->get('/logs',      'Admin\SystemController@logs');
+        $r->get('/analytics', 'Admin\SystemController@analytics');
+        $r->get('/settings',  'Admin\SystemController@settings');
+        $r->post('/settings', 'Admin\SystemController@saveSettings', ['csrf']);
     });
 };

@@ -291,12 +291,22 @@ Never call `move_uploaded_file()` directly. Display with `upload_url($path)`.
 
 ## Interim deliverable — what "done" means
 
-1. Login + signup working for all account types
-2. Every finished UI reachable by clicking (no dead links, no 404s)
-3. Each member: full Create + Read + Update + Delete on their entity
+1. Login + signup working for all account types ✅ (weeks 1–2)
+2. **All Figma UIs implemented and navigatable** (no dead links, no 404s) — week 3
+   - Every screen from the Figma renders as HTML/CSS matching the layout and design intent (good enough is OK, not pixel-perfect)
+   - No backend required — forms don't save, just redirect
+   - Every sidebar link works and opens a page
+   - Includes: all CRUD module screens, dashboards, profiles, settings, notifications, messaging, support, disaster reporting, payment checkout (sandbox)
+   - Use Figma designs in `UI/` folder as reference for layout, not as a pixel spec
+3. Each member: **one CRUD entity fully working** (Create, Read list/detail, Update, Delete) — weeks 4–5
+   - M1 · Dilsha: CleanupEvent
+   - M2 · Janudi: DonationRequest
+   - M3 · Shenol: BloodCampaign
+   - M4 · Janagan: ReuseItem ✅ (done, plus the three gaps)
 
-Screens with no backend yet should still render with placeholder data — a
-static page is acceptable, a broken link is not.
+**The difference from "finished UI":** All Figma screens must exist and be
+clickable, even if only the one CRUD per member has backend. Unbuilt screens
+show with sample data. A broken link is not acceptable.
 
 ---
 

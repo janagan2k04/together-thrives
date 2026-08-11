@@ -69,6 +69,50 @@ class ItemRequestController extends Controller
         $this->redirect('/reuse/' . $item['id']);
     }
 
+    /**
+     * The recipient rates the donor, from My Activities.
+     *
+     * Keyed on the request id rather than the item id: the request is what
+     * proves this account was the one given the item, and it is derived here
+     * rather than trusted from the form.
+     */
+    public function feedback(string $requestId): void
+    {
+        $request = $this->requests->find((int) $requestId);
+        if (!$request) {
+            $this->abort(404, 'Request not found.');
+        }
+
+        $item = $this->items->findAny((int) $request['item_id']);
+        if (!$item) {
+            $this->abort(404, 'Listing not found.');
+        }
+
+        $recipientId = (int) auth()['id'];
+
+        // Checked here rather than only when drawing the form — the form can be
+        // replayed, and a second review would inflate the donor's rating.
+        if ($reason = $this->service->feedbackBlockedReason($item, $request, $recipientId)) {
+            Session::flash('error', $reason);
+            $this->redirect('/my/activities');
+        }
+
+        $data = $this->validate([
+            'rating'  => 'required|in:1,2,3,4,5',
+            'comment' => 'max:500',
+        ]);
+
+        $this->service->leaveFeedback(
+            $item,
+            $recipientId,
+            (int) $data['rating'],
+            $data['comment'] ?? null
+        );
+
+        Session::flash('success', 'Thank you — your review is now on the donor’s profile.');
+        $this->redirect('/my/activities');
+    }
+
     // ---------- donor ----------
 
     public function index(string $itemId): void

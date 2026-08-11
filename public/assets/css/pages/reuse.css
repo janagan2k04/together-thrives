@@ -295,6 +295,29 @@
 .request-reason { font-size: var(--fs-sm); color: var(--ink-2); max-width: 420px; line-height: 1.5; }
 .request-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 
+/* My Activities — recipient's review of a donor.
+   The star row is laid out in reverse so that "every star up to the one I am
+   pointing at" is a plain sibling selector: in DOM order 5 comes first, so the
+   lower numbers are the ones that follow a checked input. */
+.review-card { display: grid; gap: var(--s-4); margin-bottom: var(--s-4); }
+.review-card .field { margin: var(--s-3) 0; }
+
+.rating-stars {
+  display: flex; flex-direction: row-reverse; justify-content: flex-end;
+  gap: 2px; margin-top: var(--s-2);
+}
+.rating-stars input { position: absolute; opacity: 0; width: 0; height: 0; }
+.rating-stars label {
+  font-size: var(--fs-xl); line-height: 1; cursor: pointer;
+  color: var(--muted-3); transition: color .12s ease;
+}
+.rating-stars label:hover,
+.rating-stars label:hover ~ label,
+.rating-stars input:checked ~ label { color: var(--amber); }
+.rating-stars input:focus-visible + label { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.rating-given { color: var(--amber); font-size: var(--fs-base); letter-spacing: 1px; }
+
 @media (max-width: 1180px) {
   .item-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

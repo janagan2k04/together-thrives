@@ -124,3 +124,27 @@
 [2026-08-11 18:19:48] AUDIT: Admin 1 reinstated account 4 (bank@test.lk)
 [2026-08-11 18:20:06] AUDIT: User 1 logged out
 [2026-08-11 18:20:40] AUDIT: User 5 (community) logged in
+[2026-08-11 22:08:49] AUDIT: Failed login for sunil@test.lk from ::1
+[2026-08-11 22:09:04] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-12 01:35:11] AUDIT: User 2 (organization) logged in
+[2026-08-12 01:35:31] AUDIT: Feedback 5/5 left by user 2 on item 1
+[2026-08-12 01:35:53] AUDIT: User 1 (admin) logged in
+[2026-08-12 01:36:02] AUDIT: GS letter 1 approved by admin 1
+[2026-08-12 01:36:27] AUDIT: User 5 (community) logged in
+[2026-08-12 01:47:10] AUDIT: User 5 (community) logged in
+[2026-08-12 03:42:12] AUDIT: User 1 (admin) logged in
+[2026-08-12 03:42:15] AUDIT: User 5 (community) logged in
+[2026-08-12 03:42:17] AUDIT: User 2 (organization) logged in
+[2026-08-12 03:42:19] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-12 03:42:21] AUDIT: User 4 (blood_bank) logged in
+[2026-08-12 03:44:15] AUDIT: User 5 (community) logged in
+[2026-08-12 03:44:19] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-12 03:44:20] AUDIT: User 1 (admin) logged in
+[2026-08-12 04:03:48] AUDIT: User 1 (admin) logged in
+[2026-08-12 04:03:50] AUDIT: User 5 (community) logged in
+[2026-08-12 04:03:53] AUDIT: User 2 (organization) logged in
+[2026-08-12 04:03:54] AUDIT: User 3 (grama_niladhari) logged in
+[2026-08-12 04:03:56] AUDIT: User 4 (blood_bank) logged in
+[2026-08-12 04:06:27] AUDIT: User 5 (community) logged in
+[2026-08-12 04:14:10] AUDIT: User 5 logged out
+[2026-08-12 04:14:27] AUDIT: User 2 (organization) logged in

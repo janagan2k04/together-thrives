@@ -6,9 +6,10 @@
 @import 'pages/landing.css';
 @import 'pages/auth.css';
 @import 'pages/admin.css';
+@import 'pages/shared.css';
 @import 'pages/reuse.css';
+@import 'pages/blood.css';
 /* module stylesheets — each member adds their own line here
 @import 'pages/cleanup.css';
 @import 'pages/donation.css';
-@import 'pages/blood.css';
 */

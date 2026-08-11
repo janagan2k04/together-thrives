@@ -30,11 +30,11 @@ $unread = (new Models\Notification())->unreadCount((int) $u['id']);
   <div class="topbar__spacer"></div>
 
   <div class="topbar__right">
-    <a class="icon-btn icon-btn--count" href="<?= url('/admin/verification') ?>" title="Notifications">
+    <a class="icon-btn icon-btn--count" href="<?= url('/notifications') ?>" title="Notifications">
       <?= icon('bell') ?>
       <?php if ($unread): ?><span class="icon-btn__count"><?= e($unread) ?></span><?php endif; ?>
     </a>
-    <a class="icon-btn" href="<?= url('/admin/complaints') ?>" title="Messages"><?= icon('inbox') ?></a>
+    <a class="icon-btn" href="<?= url('/messages') ?>" title="Messages"><?= icon('inbox') ?></a>
 
     <div class="user-chip">
       <span class="user-chip__avatar"><?= icon('user') ?></span>

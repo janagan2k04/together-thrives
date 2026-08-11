@@ -8,6 +8,7 @@ use Models\Notification;
 use Models\Reuse\DistributionCooldown;
 use Models\Reuse\GsVerification;
 use Models\Reuse\ItemRequest;
+use Models\Reuse\ReuseFeedback;
 use Models\Reuse\ReuseItem;
 
 /**
@@ -23,11 +24,15 @@ use Models\Reuse\ReuseItem;
  */
 class ItemRequestService
 {
+    /** How long an approved GS letter stays valid for. */
+    public const LETTER_VALID_MONTHS = 6;
+
     private ReuseItem            $items;
     private ItemRequest          $requests;
     private GsVerification       $gsLetters;
     private DistributionCooldown $cooldowns;
     private Notification         $notifications;
+    private ReuseFeedback        $feedback;
 
     public function __construct()
     {
@@ -36,6 +41,7 @@ class ItemRequestService
         $this->gsLetters     = new GsVerification();
         $this->cooldowns     = new DistributionCooldown();
         $this->notifications = new Notification();
+        $this->feedback      = new ReuseFeedback();
     }
 
     /**
@@ -181,6 +187,95 @@ class ItemRequestService
     }
 
     /**
+     * Why this member may not rate this donation, or null when they may.
+     *
+     * A review is the last step of the request lifecycle, so the rules live
+     * next to the rest of it: only the person who was actually given the item
+     * may rate it, only after the donor confirmed the handover, and only once.
+     */
+    public function feedbackBlockedReason(array $item, array $request, int $recipientId): ?string
+    {
+        if ((int) $request['requester_id'] !== $recipientId) {
+            return 'You can only review a donation you received.';
+        }
+        if ($request['status'] !== 'selected') {
+            return 'This request was not the one the donor selected.';
+        }
+        if ($item['status'] !== ITEM_DONATED) {
+            return 'You can review this donation once the donor marks it as handed over.';
+        }
+        if ($this->feedback->existsFor((int) $item['id'], $recipientId)) {
+            return 'You have already reviewed this donation.';
+        }
+        return null;
+    }
+
+    /**
+     * The recipient rates the donor. Written once and never edited —
+     * `reuse_feedback` has no `updated_at`, so Model::update() would fail on it
+     * anyway, and a review that can be rewritten later is worth less.
+     */
+    public function leaveFeedback(array $item, int $recipientId, int $rating, ?string $comment): void
+    {
+        Database::transaction(function () use ($item, $recipientId, $rating, $comment) {
+            $this->feedback->create([
+                'item_id'      => (int) $item['id'],
+                'recipient_id' => $recipientId,
+                'rating'       => $rating,
+                'comment'      => $comment ?: null,
+            ]);
+
+            $this->notify(
+                (int) $item['donor_id'],
+                'You received a review',
+                'A recipient rated your donation of “' . $item['title'] . '” '
+                . $rating . ' out of 5.',
+                '/reuse/donor/' . $item['donor_id']
+            );
+        });
+
+        Logger::audit("Feedback {$rating}/5 left by user {$recipientId} on item {$item['id']}");
+    }
+
+    /**
+     * An administrator decides on a Grama Niladhari letter.
+     *
+     * Until something called this, a letter was stored `pending` and never read
+     * again, so "verified disaster-affected" on a donor's queue meant no more
+     * than "claimed, and attached a file". This is what makes the badge true.
+     *
+     * An approval carries an expiry: being disaster-affected is a circumstance,
+     * not a permanent status, and a letter that never lapses would let one
+     * household hold priority for ever.
+     */
+    public function decideLetter(array $letter, string $status, int $reviewerId): void
+    {
+        $validUntil = $status === MOD_APPROVED
+            ? date('Y-m-d', strtotime('+' . self::LETTER_VALID_MONTHS . ' months'))
+            : null;
+
+        Database::transaction(function () use ($letter, $status, $reviewerId, $validUntil) {
+            $this->gsLetters->decide((int) $letter['id'], $status, $reviewerId, $validUntil);
+
+            [$title, $body] = $status === MOD_APPROVED
+                ? [
+                    'Your GS letter was verified',
+                    'Donors will now see your disaster-affected status as verified, '
+                    . 'until ' . format_date($validUntil) . '.',
+                ]
+                : [
+                    'Your GS letter was not accepted',
+                    'The letter you uploaded could not be verified. You can attach a '
+                    . 'new one to your next request.',
+                ];
+
+            $this->notify((int) $letter['user_id'], $title, $body, '/my/activities', 'verification');
+        });
+
+        Logger::audit("GS letter {$letter['id']} {$status} by admin {$reviewerId}");
+    }
+
+    /**
      * Safe through the model: `item_requests` does have an `updated_at`, so
      * the timestamp Model::update() appends has somewhere to go — unlike the
      * other child tables in this module.
@@ -190,13 +285,13 @@ class ItemRequestService
         $this->requests->update($requestId, ['status' => $status]);
     }
 
-    private function notify(int $userId, string $title, string $body, string $link): void
+    private function notify(int $userId, string $title, string $body, string $link, string $category = 'donation'): void
     {
         $this->notifications->create([
             'user_id'  => $userId,
             'title'    => $title,
             'body'     => $body,
-            'category' => 'donation',
+            'category' => $category,
             'link'     => $link,
         ]);
     }

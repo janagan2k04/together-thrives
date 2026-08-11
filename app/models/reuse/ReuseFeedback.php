@@ -30,6 +30,22 @@ class ReuseFeedback extends Model
         );
     }
 
+    /**
+     * Has this recipient already rated this donation?
+     *
+     * There is no unique key on (item_id, recipient_id) in the frozen schema,
+     * so nothing at the database level stops a second review. This is the check
+     * that does — call it before writing.
+     */
+    public function existsFor(int $itemId, int $recipientId): bool
+    {
+        return (bool) Database::value(
+            'SELECT COUNT(*) FROM reuse_feedback
+              WHERE item_id = ? AND recipient_id = ? AND deleted_at IS NULL',
+            [$itemId, $recipientId]
+        );
+    }
+
     /** Average rating and review count, or nulls when nobody has rated yet. */
     public function summaryFor(int $donorId): array
     {

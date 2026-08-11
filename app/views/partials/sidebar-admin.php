@@ -4,8 +4,11 @@
  * Badge counts are live — the verification badge is the whole point of it.
  */
 require_once APP_PATH . '/views/partials/icons.php';
+require_once APP_PATH . '/views/partials/nav-active.php';
 
 $pending = (new Models\User())->pendingCount();
+// GS letters attached to reuse requests — Member 4's review queue.
+$letters = (new Models\Reuse\GsVerification())->pendingCount();
 
 $sections = [
     ['', [
@@ -15,6 +18,7 @@ $sections = [
         ['/admin/users',         'Users',                     'users',        null],
         ['/admin/organizations', 'Organizations',             'building',     null],
         ['/admin/verification',  'Verification Requests',     'shield-check', $pending],
+        ['/admin/reuse/letters', 'GS Letter Review',          'file-check',   $letters],
         ['/admin/suspended',     'Suspended Users and Posts', 'ban',          null],
     ]],
     ['Content Management', [
@@ -38,7 +42,7 @@ $sections = [
       <?php endif; ?>
 
       <?php foreach ($links as [$href, $text, $ico, $badge]): ?>
-        <a class="sidebar__link<?= nav_active($href) ?>" href="<?= url($href) ?>">
+        <a class="sidebar__link<?= sidebar_active($href) ?>" href="<?= url($href) ?>">
           <span class="sidebar__icon"><?= icon($ico) ?></span>
           <span class="sidebar__label"><?= e($text) ?></span>
           <?php if ($badge): ?>

@@ -77,7 +77,12 @@ foreach ($requests as $r) {
               <div class="link-muted"><?= e($r['requester_city'] ?: '—') ?></div>
               <div class="request-flags">
                 <?php if ((int) $r['is_disaster_affected'] === 1): ?>
-                  <span class="badge badge--pending">Disaster-affected</span>
+                  <?php // "Verified" is only claimable once an administrator has read the letter. ?>
+                  <?php if (($r['gs_status'] ?? null) === MOD_APPROVED): ?>
+                    <span class="badge badge--success">Verified disaster-affected</span>
+                  <?php else: ?>
+                    <span class="badge badge--pending">Disaster-affected (claimed)</span>
+                  <?php endif; ?>
                 <?php endif; ?>
                 <?php if (!empty($r['gs_verification_id'])): ?>
                   <a class="badge badge--neutral" href="<?= url('/my/reuse/requests/' . $r['id'] . '/letter') ?>" target="_blank">

@@ -1,48 +1,64 @@
-# Setup, Authentication & Modules — weeks 1–5
+# Setup, Authentication & Modules — weeks 1–6
 
-Scaffold and authentication are **done**. Module work (weeks 3–5) has started:
-**M4 · Reuse is complete**; the other three CRUDs are still to come.
+**Weeks 1–2: Done** ✅  
+Scaffold and authentication complete. All four roles register, admin approves,
+each lands on its dashboard with the right sidebar.
+
+**Week 3: M4's half is done** ✅ — all 12 admin screens and every shared screen
+render, with one sample-data file behind them. **M3 · Blood is part-built** ⏳ —
+scaffolding, routes and the two browse screens are live, eight views remain.
+M1 · Cleanup and M2 · Donation have not been started. Details in the two week 3
+sections below.
+
+**Weeks 3–6: To come**  
+- **Week 3:** Render all Figma UIs as static pages with sample data, no backend
+- **Weeks 4–5:** Add backend CRUD for one entity per member (M1 · Dilsha, M2 ·
+  Janudi, M3 · Shenol each implement one CRUD; M4 · Janagan is done ✅)
+- **Week 6:** Navigation audit — verify every sidebar link opens a page, fix 404s
 
 Read the two sections directly below before you pull or start building — they are
-the only things that will bite you.
+the only things that will bite you during week 3.
 
 ---
 
-## Open actions — do these before week 3
+## Open actions — blocking week 3
 
-- [ ] **`git rm --cached -r storage/uploads`** before the first push. Six proof
-      documents from registration testing are still in git's index — one NIC scan,
-      three GN appointment letters, one organization certificate, one blood bank
-      licence. `.gitignore` now excludes the folder, but that does not untrack what
-      is already staged, and real identity scans must never reach GitHub. The files
-      stay on disk; this only stops git carrying them.
-- [ ] **Tell the group `schema.sql` changed** — see *Shared files* below. It is the
-      frozen file; anyone with their own edit in flight will conflict on `users`.
-- [ ] Create the GitHub repo, push this scaffold
-- [ ] Everyone clones, imports schema + seed, confirms the landing page loads
-- [ ] Agree branch naming: `feature/m1-cleanup-crud`
-- [ ] Agree: never push to `main` directly, always pull before you start
-- [ ] Decide who builds `/support`. Rejection and suspension notifications link
-      there and it 500s, so this gap is now visible to real users.
+- [ ] **`git rm --cached -r storage/uploads`** (if not done). Six proof documents
+      from registration testing are still in git's index. Real identity scans must
+      never reach GitHub. `.gitignore` excludes the folder going forward.
+- [ ] **Push to GitHub and everyone pulls.** The scaffold and auth are stable
+      enough to share. One person pushes; everyone else clones and confirms the
+      landing page loads.
+- [ ] **Agree on branch naming:** `feature/m1-cleanup-frontend` (week 3),
+      `feature/m1-cleanup-backend` (weeks 4–5). One branch per person per week.
+- [ ] **Agree: never push to `main` directly.** Always make a PR. Always pull
+      `main` before you start a session.
+- [x] ~~**Assign who builds `/support`.**~~ Built in week 3 by M4 — it is the
+      "Support the System" frame, with the sandbox checkout behind it.
 
-## Two rules the module weeks depend on
+## Three rules weeks 3–6 depend on
 
-Both were learned the hard way in week 2. They will cost someone a day each if
-they are rediscovered instead of read.
+Learned the hard way. They will cost someone a day each if rediscovered.
 
-**A role must never borrow another role's sidebar.** `layouts/app.php` mapped
-blood banks to the organization sidebar — sensible-looking, since both run
-campaigns. But `/org/*` is gated `role:organization`, so blood banks were shown
-three links that answered **403**, and none led back to their own dashboard. That
-role had no working navigation at all and nobody noticed for two phases. If two
-roles genuinely need one screen, widen that route's `role:` list deliberately.
+**Week 3 (frontend): A role must never borrow another role's sidebar.**
+`layouts/app.php` mapped blood banks to the org sidebar — both run campaigns.
+But `/org/*` is gated `role:organization`, so blood banks saw links that
+answered **403** and had no working navigation. When you add a new screen in
+week 3, check which sidebars link to it. If two roles need it, widen that
+route's `role:` list deliberately — do not reuse another role's sidebar.
 
-**Child and lookup tables need `$softDelete = false` — and check `updated_at`
-too.** `Model::update()` unconditionally appends `updated_at = NOW()`, so calling
-it on a table without that column is a SQL error, not a silent no-op. Tables hit
-so far: `notifications`, `password_resets`, `email_verifications`. Their writes go
-through `Database::run()` instead. Check your own tables in `schema.sql` before
-assuming `update()` works.
+**Weeks 4–5 (backend): Child and lookup tables need `$softDelete = false` —
+and check `updated_at` too.** `Model::update()` writes `updated_at = NOW()`
+unconditionally. If your table lacks that column, you get a SQL error. Tables
+without `updated_at`: `item_images`, `item_requests`, `gs_verifications`,
+`distribution_cooldowns`, `reuse_feedback`, plus the ones from week 2 
+(`notifications`, `password_resets`, `email_verifications`). Their writes go
+through `Database::run()` instead. **Check your own tables in `schema.sql`
+before assuming `update()` works.**
+
+**Every session (weeks 3–6): Lint before you commit.**  
+`php -l app/controllers/your/file.php` catches syntax errors. Opening the URL
+catches everything else. A commit that does not run blocks whoever pulls next.
 
 ---
 
@@ -218,13 +234,309 @@ too large to open comfortably.
 
 ---
 
-## Weeks 3–5 — M4 · Reuse Items ✅
+## Week 3 — Frontend render-out: **ALL Figma UIs** (all four members, parallel)
 
-**Done means:** full Create + Read + Update + Delete on `reuse_items`, every
-screen reachable by clicking, and no dead links out of it.
+**Deliverable:** EVERY Figma frame exists as an HTML page. No backend, no data
+persistence — just layout, styling, forms that redirect without saving, and
+sample data to show what the page looks like with content.
 
-Signed off by walking the sentence end to end, in the browser, as four
-different callers — donor, another member, administrator and signed-out guest.
+**Follow the Figma designs — "good enough" is OK.**
+
+Use Figma as a reference, not a pixel-perfect spec. Match the layout and design intent.
+
+What must match:
+- Layout and structure (where things go)
+- Component types (use existing `.card`, `.table`, `.field` classes)
+- Color scheme and hierarchy (use CSS tokens from variables.css, not custom colors)
+
+What's optional:
+- Exact spacing (within ~5px is fine)
+- Font sizes (close enough is good)
+- Shadows and subtle effects
+
+Figma source files are in `UI/` folder. Open the frame to understand the design,
+then build it using existing CSS classes and sample data. Focus on getting the
+layout right, not the spacing perfect.
+
+**Scope is large:** Not just the four CRUD modules, but also shared screens,
+admin panels, user profiles, settings, notifications, messaging, dashboards,
+support, disaster reporting, etc. for all five user types.
+
+**Week 3 Workload Division — DECIDED:**
+
+**M4 · Janagan (You) — Heavy lift: Admin + Shared screens**
+- Reason: Reuse CRUD already done ✅, so you have capacity for admin + shared foundation
+- **Admin (12 screens):** Dashboard, Verification, Users, Organizations, Suspended, Complaints, Announcements, Dengue, Admin Mgmt, Logs, Analytics, Settings
+- **Shared (11 screens):** Dashboards (5 roles), sidebars + top nav, profiles + settings, notifications, messaging, organizations, my activities, support, disaster report, payment/checkout, error pages (404/403/500) + system pages (registration/verification/reset)
+- **Workload: ~50% of week 3**
+
+**M1 · Dilsha (Cleanup) — Cleanup module only**
+- Browse, create, detail, edit, volunteer sign-up, feedback, activities
+- Focus entirely on cleanup screens — no shared screens
+- **Workload: ~15% of week 3**
+
+**M2 · Janudi (Donation) — Donation module only**
+- Browse requests, create form, detail, edit, pledge flow, status flow, activities
+- Focus entirely on donation screens — no shared screens
+- **Workload: ~15% of week 3**
+
+**M3 · Shenol (Blood) — Blood module only**
+- Campaign browse, detail, screening form, eligibility, appointment, activities
+- Focus entirely on blood screens — no shared screens
+- **Workload: ~15% of week 3**
+
+**Remaining ~5%:** Landing page verification, edge cases
+
+**Payment/Checkout (sandbox):** Forms for card input (cardholder name, card
+number, expiry, CVV, billing address), amount display, confirmation screen. No
+backend processing — form just redirects after "submit." Use this for donation
+pledges, cleanup fees, blood bank registrations, etc.
+
+**Verify:** 
+- Every sidebar link opens a page (zero 404s)
+- Every role can access only their screens
+- Every form renders without errors (clicking submit redirects, no save)
+- Guest can browse public pages
+- Sample data: lists with 5+ items, detail pages with content
+- Notifications panel has sample notifications
+- Chat/messaging has structure (or placeholder if not in Figma)
+
+**Pattern to copy:** The reuse module's frontend (`app/views/reuse/*.php`,
+`public/assets/css/pages/reuse.css`) shows layout, CSS classes, form structure,
+and how to loop sample data for lists.
+
+---
+
+## Week 3 — M4 · Admin + shared screens ✅
+
+**Done means** (from the plan): every screen in this member's scope renders,
+every sidebar and topbar link opens a page, every form renders and behaves, and
+each role sees only its own screens.
+
+Signed off by walking that sentence role by role, the same way week 2 was —
+not by testing each screen as it was built. Every path below returned 200 as
+the role that owns it; a community member gets 403 on `/admin/*` and on
+`/gn/disasters`.
+
+### Admin — 12 screens
+
+| Screen | Route | Data |
+|---|---|---|
+| Dashboard | `/admin/dashboard` | **real** — pending counts, accounts by role, recent registrations |
+| Verification Requests | `/admin/verification` | real (week 2, untouched) |
+| Users | `/admin/users` | real (week 2, untouched) |
+| Organizations | `/admin/organizations` | real (week 2, untouched) |
+| GS Letter Review | `/admin/reuse/letters` | real (reuse module, untouched) |
+| Suspended Users and Posts | `/admin/suspended` | **real accounts** + sample posts |
+| Complaints & Feedback | `/admin/complaints`, `/admin/complaints/{id}` | sample |
+| Announcements | `/admin/announcements` + create/edit | sample |
+| Dengue Alert | `/admin/dengue` | sample alerts, **real district list** |
+| Admin Management | `/admin/admins` | **real admins** + sample rows |
+| System Logs | `/admin/logs` | **real** — reads `storage/logs/{audit,error,app}.log` |
+| Analytics & Stats | `/admin/analytics` | **real** — live counts per module |
+| Settings | `/admin/settings` | form only, nothing persisted |
+
+`Admin\PlaceholderController` and `views/admin/placeholder.php` are **deleted**.
+`config/routes/admin.php` had its eight placeholder targets swapped, exactly as
+the comment in that file asked; nothing above that block was touched.
+
+### Shared screens
+
+Dashboards for all five roles · sidebars and both topbars · profile · settings ·
+notifications · messaging · organizations directory and profile · support
+(fund the platform) · report a problem · dengue risk map · disaster reporting
+(list, create, detail) · sandbox checkout and receipt · search.
+
+New controllers live in `app/controllers/` (root namespace) and
+`app/controllers/admin/`; new views under `app/views/{home,profile,notifications,
+messages,organizations,support,report,dengue,search,checkout,gn,admin}/`.
+Week-3 placeholder content is in **one file**, `app/services/SampleData.php`,
+so it is obvious what to delete when the real queries land.
+
+### Decisions taken
+
+- **`config/routes/web.php` was not edited** — it is on the do-not-modify list
+  in CLAUDE.md. It already declared `/profile`, `/settings`, `/notifications`,
+  `/messages`, `/organizations` and `/support`, so those only needed
+  controllers. The shared screens it does *not* declare — `/search`, `/report`,
+  `/dengue`, `/checkout`, `/gn/disasters`, and the `POST /settings` — are
+  declared in `routes/reuse.php` under a labelled block, the same reasoning as
+  the GS letter review routes. If the group opens web.php, move them.
+- **One dashboard controller method, four views.** `/org/dashboard` and
+  `/blood-bank/dashboard` live in Members 1 and 3's route files and both point
+  at `HomeController@dashboard`. Rather than ask them to repoint their files,
+  that method now picks the view from `Auth::role()`.
+- **No organization or blood-bank dashboard frame exists.** Cleanup-Org.svg and
+  Blood-Org.svg both start at their module list. Those two dashboards follow the
+  GN frame's shape, which is the house pattern for a role landing page.
+- **Profile drops Username, Date of Birth, Gender and postal address** — the
+  same week-2 ruling that shortened the registration forms. No columns exist.
+- **Messaging renders but cannot send.** `conversations`,
+  `conversation_members` and `messages` are in the schema and nothing writes to
+  them; the compose box is `disabled` rather than posting into a void.
+- **System Logs reads the log files, not `audit_logs`.** `Logger::audit()` has
+  been writing them since week 2, so the screen shows real history today.
+  Moving the logger onto the table later would not change the screen.
+- **No new seed content.** Nothing was written to the database — re-checked
+  after running every form: `announcements`, `disaster_reports`, `reports`,
+  `dengue_risk_districts` and `payments` are all still empty, and there is still
+  exactly one administrator.
+
+### Fixed while sweeping the navigation
+
+- **`nav_active()` lit two sidebar links at once.** It is a bare
+  `str_starts_with`, so `/blood-bank/dashboard` counted as being inside
+  `/blood` and a blood bank saw its dashboard *and* "Browse Campaigns"
+  highlighted. The helper is in `app/core/Helpers.php`, which nobody may edit,
+  so `views/partials/nav-active.php` adds `sidebar_active()` — the same test on
+  a path boundary — and both sidebar partials use it. Delete that file if the
+  group ever agrees to fix the helper itself.
+- **`/support` used to answer 500 on every role.** That was the last open action
+  at the top of this file. It is a real screen now.
+- **The topbar Report link pointed at `/login`** for signed-in users. It points
+  at `/report`. The guest topbar still sends people to sign in, which is right —
+  reporting needs an account.
+- **The admin topbar's bell and inbox pointed at `/admin/verification` and
+  `/admin/complaints`.** They now open the real Notifications and Messages
+  screens, which is what the `Notifications - Admin` and `Messages - Admin`
+  frames show.
+- **Role sidebars had no icons.** `sidebar-render.php` now takes an optional
+  third element per item, so all four sidebars match their frames.
+
+### Not done — belongs to other members
+
+`/cleanup`, `/donations` and `/blood` still answer **500**: their controllers do
+not exist. They are M1, M2 and M3's week 3 screens, and they are linked from the
+community, organization, GN and blood-bank sidebars, which are otherwise
+complete. Until those three land, "zero dead links" is not true for the group as
+a whole even though it is true for every screen in M4's scope.
+
+---
+
+## Week 3 — M3 · Blood (part-built) ⏳
+
+Started on request and **paused part-way**. Everything below is committed and
+lints clean; the module is in a working state, not a broken one — the two
+screens that exist render, and the rest fail the same way they did before
+(a 500 from a missing piece), so nothing regressed.
+
+**Ownership note:** this is Shenol's module. `config/routes/blood.php`, the
+`Blood\` namespace and `app/views/blood/` are M3's under CLAUDE.md's one-file-
+per-member rule. It was touched at the project owner's explicit request. Whoever
+picks it up should read this section first and is free to change any of it.
+
+### Done
+
+| Piece | File |
+|---|---|
+| Sample data (self-contained, delete in weeks 4–5) | `app/services/BloodSampleData.php` |
+| Campaign controller — hub, camp detail, organiser CRUD | `app/controllers/blood/BloodCampaignController.php` |
+| Critical request controller | `app/controllers/blood/CriticalRequestController.php` |
+| Screening controller (incl. eligibility scoring) | `app/controllers/blood/ScreeningController.php` |
+| Certificate controller | `app/controllers/blood/CertificateController.php` |
+| Routes — original six CRUD routes unchanged, rest added | `config/routes/blood.php` |
+| Stylesheet + its `main.css` import line | `public/assets/css/pages/blood.css` |
+| Bare layout for printable documents | `app/views/layouts/blank.php` |
+| Community hub, five tabs | `app/views/blood/index.php` |
+| Camp detail | `app/views/blood/show.php` |
+
+Verified live: `/blood`, `/blood?tab=camps`, `?tab=critical`, `?tab=donations`,
+`?tab=registrations`, and `/blood/1`.
+
+### To finish — eight views
+
+Each one's controller, route and sample data already exist, so this is view work
+only. The Figma frame each comes from is in `UI/Blood/`:
+
+| View file to write | Route | Frame |
+|---|---|---|
+| `blood/manage.php` | `/my/blood` | Blood-Org, frame 1 — "Your Posted Blood Donation Campaigns" |
+| `blood/form.php` | `/my/blood/create`, `/{id}/edit` | Blood-Org, frame 2 — "Create New Blood Campaign" |
+| `blood/detail.php` | `/my/blood/{id}` | Blood-Org, frame 3 — campaign detail + registered donors |
+| `blood/critical-form.php` | `/blood/critical/create` | Blood-User — "Post a Critical Blood Request" |
+| `blood/critical-show.php` | `/blood/critical/{id}` | Blood-User — "Critical Request Details" |
+| `blood/screening.php` | `/blood/{id}/screening` | Blood-User — "Blood donation Form" |
+| `blood/screening-done.php` | `/blood/screening/submitted` | Blood-User — "Form Submitted" |
+| `blood/certificate.php` | `/blood/certificate/{id}` | Blood-User — A4 landscape certificate (uses the `blank` layout) |
+
+`pages/blood.css` already carries the classes all eight need — `.camp-table`,
+`.count-grid`, `.donor-table`, `.type-pick`, `.group-pick`, `.q-row`,
+`.done-card`, `.cert__*` and so on. Read it before inventing anything.
+
+### Rendering the Figma frames
+
+Both blood SVGs are single wide exports with the text as paths, and the frames
+are **not** evenly spaced — guessing a stride gives you half-frames. Detect the
+frame edges instead: render the whole SVG small, then scan for runs of non-black
+columns. `Blood-User.svg` has 9 frames at x = 0, 2868, 4468, 6068, 8220, 9960,
+12120, 13684, 15284 (all 1440 wide except the certificate at 1124).
+`Blood-Org.svg` has 3 frames at x = 0, 1540, 3080.
+
+Note that `storage/` is `Deny from all` in Apache, so a wrapper page there cannot
+load anything over http — render with `file://` URLs.
+
+### Decisions taken
+
+- **No model yet.** `Models\Blood\BloodCampaign` is deliberately not written —
+  the model plus real queries *is* M3's weeks 4–5 CRUD deliverable, and week 3
+  needs no database reads. The controllers read `BloodSampleData` instead.
+- **The forms validate against the real columns.** `validateCampaign()` and the
+  critical-request rules use the actual `blood_campaigns` and
+  `critical_blood_requests` columns and ENUMs, so weeks 4–5 keeps them and
+  replaces only the flash with a `create()` call.
+- **Blood types needed is collected and dropped.** The Figma create form asks
+  which groups a campaign needs; `blood_campaigns` has no column for it. Dropped
+  rather than faked — the same ruling as the week 2 registration forms.
+- **Screening is scored for real.** `ScreeningController::verdict()` applies each
+  question's disqualifying answer, the way `screening_responses.result` will.
+  The result is flashed, not stored.
+- **Joining goes through screening.** "Join This Camp" and "I Can Donate" both
+  redirect to the screening form rather than registering directly, because both
+  frames promise that contact details are shared only after an eligibility check.
+- **Certificate gets its own layout.** It is an A4 document, not an app screen,
+  so `layouts/blank.php` renders it with no chrome and a `@media print` block.
+
+### Shared files touched
+
+- `public/assets/css/main.css` — `@import 'pages/blood.css';` moved out of the
+  commented block. M1 and M2's lines are still commented where they were.
+- `app/views/layouts/blank.php` — new, and general-purpose: any printable
+  receipt or letter can use it.
+
+---
+
+## Weeks 4–5 — Backend CRUD (each member, their own module)
+
+**Deliverable:** One CRUD entity per member, fully working (Create, Read list,
+Read detail, Update, Delete). Real data in the database, real forms that save.
+
+- **M1 · Dilsha:** CleanupEvent CRUD
+- **M2 · Janudi:** DonationRequest CRUD
+- **M3 · Shenol:** BloodCampaign CRUD
+- **M4 · Janagan:** Done ✅
+
+**Pattern:** Follow the reuse module's worked example (sessions 1–5 in the
+section below). One session per day, one commit per session.
+
+---
+
+## Week 6 — Navigation audit
+
+**Deliverable:** Every sidebar link opens a page. Zero 404s. End-to-end flow
+works: guest landing → register → admin approves → user logs in → creates item
+→ edits it → browses → views detail.
+
+---
+
+## M4 · Reuse Items — The worked example ✅
+
+**Complete backend CRUD + frontend + all closing gaps.** This is what "interim
+done for one module" looks like. Dilsha, Janudi and Shenol should follow this
+pattern for weeks 4–5: one entity, full CRUD, tests in the browser as four
+callers (owner/donor, peer member, admin, guest).
+
+For week 3, the reuse module's frontend patterns (CSS classes, form structure,
+navigation wiring, sample data loops) can be reused in the other modules.
 
 ### What was built
 
@@ -236,6 +548,7 @@ different callers — donor, another member, administrator and signed-out guest.
 | 4 · Update | `@edit / update`; `views/reuse/edit.php` (reuses `_form.php`) |
 | 5 · Delete | `@destroy` — status `ITEM_REMOVED` + soft delete — plus `@relist` to undo it |
 | Request flow | `ItemRequestController`, `services/ItemRequestService.php`, `models/reuse/GsVerification.php`, `DistributionCooldown.php`, `ReuseFeedback.php`; `views/reuse/requests.php`, `_request-modal.php`, `donor.php` |
+| Closing the gaps | `MyActivityController` + `views/reuse/activities.php`; `@feedback` + `ItemRequestService::leaveFeedback / feedbackBlockedReason`; `GsLetterController` + `views/reuse/admin-letters.php` + `decideLetter()` |
 
 The request flow is not extra credit — `routes/reuse.php` already declared
 `ItemRequestController@store` and `@index`, and the detail page's primary
@@ -303,19 +616,41 @@ busiest screen would have answered 500.
   vanished from My Listings entirely and the owner-visibility branch on the
   detail page was unreachable. The donor's own queries have to opt back in.
 
+### The three gaps above, now closed ✅
+
+Signed off the same way — walked in the browser as requester, donor,
+administrator and guest.
+
+- **My Activities.** `/my/activities` exists. Both `sidebar-community.php` and
+  `sidebar-org.php` had linked there since week 1 and the link 404'd;
+  `ItemRequest::forRequesterList()` finally has its caller. The screen lists
+  every request this member has made, what became of it, and — for a completed
+  donation — the review form. It is deliberately *not* reuse-only in shape:
+  whoever builds cleanup sign-ups or blood appointments should add a section to
+  `MyActivityController` rather than a second screen.
+- **Ratings.** A recipient rates the donor from that screen, on exactly one
+  condition — the donor selected them *and* then confirmed the handover.
+  Anything looser would let people rate donors they never met. Written once and
+  never edited (`reuse_feedback` has no `updated_at`, so `Model::update()` could
+  not change it anyway, and a rewritable review is worth less). The donor
+  profile's rating, review list and star summary are now real rows instead of an
+  empty state.
+- **Administrator review of GS letters.** `/admin/reuse/letters`, linked from the
+  admin sidebar with a live pending badge. Approve, reject, and open the letter
+  itself. An approval carries a six-month expiry, because being disaster-affected
+  is a circumstance and not a permanent status — a letter that never lapsed would
+  let one household hold priority for ever.
+  - This is what makes the priority badge true. The donor's queue now separates
+    **Verified disaster-affected** from **Disaster-affected (claimed)**, and
+    `ItemRequest::forItem()` sorts a verified claim above an asserted one. Before
+    this, both the badge and the queue position were worth no more than the tick
+    box that set them.
+
 ### Not built
 
 - **Messaging.** Frame 3 shows a "Message donor" button once a request is
   accepted. There is no chat module yet, so the button is not drawn — the
   requester sees the request state instead. Wire it up when chat lands.
-- **Ratings.** The donor profile frame shows a star rating, review list and
-  handover rate. `reuse_feedback` has no rows and nothing writes to it yet, so
-  those panels carry a real empty state rather than invented numbers. The
-  stats that *are* shown (items donated, currently listed, requests received,
-  disaster-affected helped) are counted from real rows.
-- **Administrator review of GS letters.** A letter is stored `pending` and the
-  donor can open it, but no admin screen approves one, so "verified
-  disaster-affected" currently means "claimed, with a letter attached".
 
 ---
 
@@ -365,12 +700,51 @@ A stale copy of any of these behaves differently:
 
 `ROLE_BLOOD_BANK` now resolves to its own sidebar instead of sharing the org one.
 
-### `public/assets/css/main.css` — one import line
+### `app/views/partials/sidebar-admin.php` — one link
 
-`@import 'pages/reuse.css';` is now live; the other three module lines are
-still commented out where the file invites each member to add their own. Adding
-your line is a one-line edit to a shared file — expect a trivial conflict if
-two of you push at once, and take both lines.
+**GS Letter Review** was added under User & Organization Management, with a live
+pending badge alongside the verification one. Two lines. Its screen routes from
+`routes/reuse.php`, not `routes/admin.php`, so Member 3's route file is
+untouched — the week-2 queue reviews *accounts*, this reviews evidence attached
+to a reuse request.
+
+### `public/assets/css/main.css` — two import lines
+
+`@import 'pages/reuse.css';` and `@import 'pages/shared.css';` are now live; the
+other three module lines are still commented out where the file invites each
+member to add their own. Adding your line is a one-line edit to a shared file —
+expect a trivial conflict if two of you push at once, and take both lines.
+
+`pages/shared.css` is week 3's stylesheet for the dashboards, profile, settings,
+notifications, messaging, organizations, dengue, support, checkout, search and
+disaster reporting. It is tokens only — no new colours — and it is additive, so
+it cannot change how an existing screen looks.
+
+### Week 3 changes to shared files — pull before you start your module
+
+- **`config/routes/admin.php`** — the eight placeholder targets under
+  "still to be built" now point at real controllers, and a few POST/PUT routes
+  joined them. Nothing above that block changed.
+- **`config/routes/reuse.php`** — gained a labelled block of shared routes,
+  because `web.php` may not be edited. If you need a shared route and it is not
+  in `web.php`, put it in your own file the same way.
+- **`app/views/partials/sidebar-{community,org,gn,blood-bank}.php`** — icons,
+  a Report link, and the missing Dengue / My Activities entries. Items are now
+  `[href, label, icon]`; the icon is optional.
+- **`app/views/partials/sidebar-render.php`** and **`sidebar-admin.php`** — both
+  call the new `sidebar_active()` instead of `nav_active()`.
+- **`app/views/partials/nav-active.php`** — new, three lines of logic. See the
+  navigation fixes in the week 3 section above.
+- **`app/views/partials/topbar-user.php`** — real unread count, Report link, the
+  account chip links to `/profile`.
+- **`app/views/partials/topbar-admin.php`** — bell and inbox point at
+  `/notifications` and `/messages`.
+- **`app/controllers/HomeController.php`** — `dashboard()` now picks a view per
+  role. The four routes that point at it are unchanged, including the two in
+  Members 1 and 3's files.
+- **Deleted:** `app/controllers/admin/PlaceholderController.php`,
+  `app/views/admin/placeholder.php`, `app/views/home/dashboard.php`. Nothing
+  else referenced them.
 
 ---
 
@@ -399,12 +773,11 @@ two of you push at once, and take both lines.
   password by typing their address. Wiring in real SMTP is a later phase.
 - There is no "resend confirmation link" screen yet. The verify-email failure page
   tells people to request one from their profile, which is week 6 work.
-- These still 500 until their phase lands: `/support` (week 6),
-  `/cleanup`, `/blood`, `/donations` (weeks 3–5). `/reuse` is live.
-- The sidebar's **My Activities** link does not yet show the items a member has
-  requested. `ItemRequest::forRequesterList()` returns exactly that and has no
-  caller — whoever builds that screen can use it.
-- The topbar "Report" link points at `/login`; disaster reporting is M1's week 3–5 work.
+- These still 500 until their phase lands: `/cleanup` and `/donations` — M1 and
+  M2's week 3 screens. `/reuse`, `/support` and `/blood` are live; the rest of
+  M3's blood module is part-built (see the week 3 · M3 section below).
+- ~~The topbar "Report" link points at `/login`~~ — it opens `/report` for a
+  signed-in account. Disaster reporting is at `/gn/disasters`, built in week 3.
 - `Router` compiles `{param}` to `([^/]+)`, so the `/file/{path}` route declared in
   `web.php` cannot match a stored path like `gn-documents/abc.pdf`. Admin review
   documents are served by account id instead (`/admin/verification/{id}/document`).
@@ -435,7 +808,14 @@ one **donated** to `hope@test.lk` (which left a live category cooldown on that
 account until early September) and one **available**. Nothing is seeded, so
 clear them freely and relist:
 
+The donated one now also carries a **5-star review** from `hope@test.lk` (visible
+on Dilani's public profile) and an **approved GS letter**, both created through
+the real screens while signing the gap work off. They are what the demo needs to
+show a non-empty rating panel and a decided letter, so keep them unless you are
+resetting the module:
+
 ```sql
+DELETE FROM reuse_feedback;
 DELETE FROM distribution_cooldowns;
 DELETE FROM item_requests;
 DELETE FROM gs_verifications;

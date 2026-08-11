@@ -2,14 +2,16 @@
 
 Week 1 scaffold is done. This is how to get from there to the interim demo.
 
-> **Status: weeks 1 and 2 are complete, and weeks 3–5 are under way.** All four
-> account types register, the admin approves them, and each lands on its own
-> dashboard with its own sidebar. Password reset and email verification are built
-> too. Of the four CRUDs, **M4 · Reuse is done** — all five sessions below, plus
-> the request flow its detail page depends on. **M1 · Cleanup, M2 · Donation and
-> M3 · Blood are still to build.** Sections "Week 2" and "Weeks 3–5" below are kept
-> as the method; the outcome, the decisions taken, the gaps that remain and the
-> open actions are all in `WEEK1-CHECKLIST.md`.
+> **Status: weeks 1 and 2 are complete.** All four account types register, the
+> admin approves them, and each lands on its own dashboard with its own sidebar.
+> Password reset and email verification are built. Week 3 will render all Figma
+> screens as static pages with sample data. Weeks 4–5 will add backend to one
+> CRUD per member in parallel. Of the four CRUDs, **M4 · Reuse is already
+> complete** with full backend including the gaps (ratings, admin GS letter
+> review, and My Activities). **M1 · Cleanup, M2 · Donation and M3 · Blood need
+> both frontend (week 3) and backend CRUD (weeks 4–5).** The outcome, the
+> decisions taken, the gaps, and the open actions for Reuse are all in
+> `WEEK1-CHECKLIST.md`.
 >
 > Read the *Gotchas* list in that file before starting your own module. Four more
 > tables turned out to be missing timestamp columns the base `Model` assumes, and
@@ -105,9 +107,178 @@ log in, each lands on the right dashboard with the right sidebar.
 
 ---
 
-## Weeks 3–5 — The four CRUDs (fully parallel)
+## Week 3 — Frontend render-out: **ALL Figma UIs** (all four members, parallel)
 
-Each member, same five sessions. Example is M1 / Cleanup Event; substitute your own.
+Build every Figma UI as static HTML/CSS pages. No backend yet — just layout,
+styling, forms that don't save, and sample data. The goal: every screen is
+clickable from the navigation, no dead links, the interim UI is complete.
+
+**Follow the Figma designs — "good enough" is OK.**
+
+Figma designs are the reference. Build HTML/CSS that matches the layout and design intent — exact pixel measurements and micro-spacing don't matter.
+
+What must match:
+- Overall layout and structure
+- Content organization (where things go)
+- Component types (use `.card`, `.table`, `.field` classes, not custom divs)
+- Color scheme and visual hierarchy (use CSS tokens, not custom colors)
+
+What doesn't need to match exactly:
+- Pixel-perfect spacing (within ~5px is fine)
+- Font sizes (close is good enough)
+- Shadows and subtle effects - not needed.
+
+Figma files are in `UI/` folder — use them as reference, not as a spec to measure against:
+- `UI/Cleanup/Cleanup.svg` — all cleanup screens
+- `UI/Donation/Donation.svg` — all donation screens
+- `UI/Blood/Blood.svg` — all blood screens
+- `UI/Reuse/Reuse.svg` — reference (already implemented)
+- `UI/Admin/admin.svg` — all 12 admin screens
+- `UI/Landing/` — landing page designs
+- `UI/Auth/` — login, register, password reset
+- `UI/Shared/` — dashboards, profiles, settings, notifications, etc.
+
+**Before coding:** Look at the Figma frame to understand the layout, then build it with existing CSS classes.
+
+**Scope:** Every Figma frame, every user type, every feature. Not just the four
+CRUD modules — also shared screens, admin, profiles, settings, notifications,
+messaging, support, disaster reporting, etc.
+
+### Each member's week 3 scope:
+
+> **M1 · Dilsha (Cleanup):** All cleanup Figma screens
+> - Browse/list, create form, detail, edit, volunteer sign-up, feedback, activities
+> - Sample data: 5 cleanup events, volunteers, feedback
+> - ✓ Focus only on cleanup module — no shared screens
+>
+> **M2 · Janudi (Donation):** All donation Figma screens
+> - Browse requests, create form, detail, edit, pledge flow, status flow, activities
+> - Sample data: 5 donation requests, pledges
+> - ✓ Focus only on donation module — no shared screens
+>
+> **M3 · Shenol (Blood):** All blood Figma screens
+> - Campaign browse, detail, screening form, eligibility result, appointment booking, activities
+> - Sample data: 5 campaigns, screening results, appointments
+> - ✓ Focus only on blood module — no shared screens
+>
+> **M4 · Janagan (You):** Heavy lift — Admin screens (12) + Shared screens (11)
+> - **Reuse module:** Already done ✅ — use as pattern/reference for others
+> - **Admin (12 screens):** Dashboard, Verification, Users, Organizations, Suspended, Complaints, Announcements, Dengue, Admin Mgmt, Logs, Analytics, Settings
+> - **Shared (11 screens):** Dashboards (5 roles), sidebars + nav, profile + settings, notifications, messaging, organizations, my activities, support, disaster report, payment/checkout, error pages + system pages (registration/verification/reset)
+
+### Week 3 Workload Division — DECIDED
+
+**M4 · Janagan (You) — Heavy lift: Admin + Shared screens** (because Reuse CRUD is done ✅)
+
+All 12 admin screens:
+- Dashboard, Verification, Users, Organizations, Suspended, Complaints, Announcements, Dengue, Admin Mgmt, Logs, Analytics, Settings
+
+All shared screens (across all roles):
+- Dashboards (5 roles), sidebars + top nav, profiles + settings, notifications, messaging, organizations list, my activities, support, disaster report, payment/checkout, search, error pages (404/403/500), registration/verification/reset pages
+
+**M1 · Dilsha — Cleanup module screens only**
+- Browse, create, detail, edit, volunteer sign-up, feedback, activities
+
+**M2 · Janudi — Donation module screens only**
+- Browse requests, create form, detail, edit, pledge flow, status flow, activities
+
+**M3 · Shenol — Blood module screens only** ⏳ *part-built — see below*
+- Campaign browse, detail, screening form, eligibility, appointment, activities
+
+**Workload split:** M4 ~50%, M1 ~15%, M2 ~15%, M3 ~15%, landing page ~5%**
+
+---
+
+### M3 · Blood — part-built, paused mid-way
+
+The scaffolding, routes, sample data, stylesheet and the two community browse
+screens are done. **Eight views are still to write.** Full hand-over notes,
+including the exact file list and the frame each view comes from, are in
+`WEEK1-CHECKLIST.md` under "Week 3 — M3 · Blood (part-built)".
+
+Live now (verified by URL):
+
+- [x] `/blood` — hub, all five tabs (All · Upcoming Camps · Critical Requests · My Donations · My Registrations)
+- [x] `/blood/{id}` — camp detail
+
+Still 500, view file missing:
+
+- [ ] `/my/blood` — organiser campaign list
+- [ ] `/my/blood/create` and `/my/blood/{id}/edit` — campaign form
+- [ ] `/my/blood/{id}` — organiser campaign detail with registered donors
+- [ ] `/blood/critical/create` — post a critical blood request
+- [ ] `/blood/critical/{id}` — critical request detail
+- [ ] `/blood/{id}/screening` — medical screening form
+- [ ] `/blood/screening/submitted` — screening confirmation
+- [ ] `/blood/certificate/{id}` — appreciation certificate
+
+
+**System pages:** ✅ (verified by URL — see `WEEK1-CHECKLIST.md`)
+- [x] Landing page
+- [x] 404 error page
+- [x] 403 forbidden page
+- [x] 500 error page
+- [x] Registration success page
+- [x] Email verification page
+- [x] Password reset page
+
+**M4 · Janagan — Admin sidebar (ALL 12 screens, assigned to you):** ✅
+- [x] Admin Dashboard (main landing for admin)
+- [x] Verification Requests (built week 2, unchanged)
+- [x] Users list (built week 2, unchanged)
+- [x] Organizations list (built week 2, unchanged)
+- [x] Suspended Users and Posts (moderation list)
+- [x] Complaints & Feedback (report management)
+- [x] Announcements (create/edit/list announcements)
+- [x] Dengue Alert (dengue risk management)
+- [x] Admin Management (manage other admins)
+- [x] System Logs (audit log viewer — reads the real `storage/logs/*.log`)
+- [x] Analytics & Stats (live counts, per module)
+- [x] Settings (system configuration)
+
+**M4 · Janagan — Shared screens:** ✅
+- [x] Dashboards for all five roles
+- [x] Sidebars + top navigation (icons, one active link per page)
+- [x] Profile + settings
+- [x] Notifications (real rows when the account has any, sample otherwise)
+- [x] Messaging (two-pane layout, replying switched off)
+- [x] Organizations directory + profile
+- [x] My Activities (delivered with the reuse module)
+- [x] Support (fund the platform) + Report a Problem
+- [x] Disaster reporting — list, create form, detail with verification timeline
+- [x] Payment / checkout (sandbox) + receipt
+- [x] Search
+
+**Still open at the end of M4's week 3:** `/cleanup` and `/donations` answer 500
+— their controllers do not exist. They are M1 and M2's week 3 screens, and they
+are linked from sidebars that are now otherwise complete. `/blood` is live; the
+rest of M3's module is part-built and listed above.
+
+**Approach:** Copy the layout pattern from Reuse module (already complete).
+Reuse its CSS classes (`.card`, `.table`, `.field`, `.badge`, `.btn--*`),
+component patterns, and form structure. Hardcode sample data with `count()` loops
+to show what a list of 5 items looks like. Wire everything into the sidebars and
+top navigation.
+
+**Verify — week 3 is done when:**
+- Every sidebar link (community, org, GN, blood-bank, admin) opens a page → zero 404s
+- Every role sees only their own screens (other roles get 403 or redirect to their dashboard)
+- Every form renders without errors (clicking submit just redirects back, no save)
+- Guest can browse: landing page, register, module browse pages (cleanup, donation, blood, reuse)
+- Each logged-in role can access: their dashboard, profile, settings, notifications, my activities
+- Admin can navigate all admin screens (no dead links in admin sidebar)
+- Sample data shows properly: lists with 5+ items, detail pages with content, forms with all fields
+- Notifications panel shows sample notifications (unread, read)
+- Chat/messaging shows structure or placeholder (not required to be built if not in Figma)
+- Support/help page is static but looks complete
+- Disaster reporting form renders (static, no backend)
+
+---
+
+## Weeks 4–5 — Backend CRUD, one per member (fully parallel)
+
+Each member implements **one CRUD entity** with full backend (Read list, Create,
+Update, Delete). Example is M1 / Cleanup Event; substitute your own.
 M4 · Reuse has been through all five — `app/controllers/reuse/`,
 `app/models/reuse/` and `app/views/reuse/` are a worked example of the shape
 these sessions produce, if you would rather read one than start cold.
@@ -145,28 +316,42 @@ Insert 3 test rows manually in phpMyAdmin to have something to display.
 
 **After each session:** commit, push, and tell your group it's merged.
 
+**Interim is done when:** all four modules have at least one CRUD working
+end-to-end (working example: Reuse Item from Janagan is complete; Cleanup Event
+from Dilsha, Donation Request from Janudi, Blood Campaign from Shenol must each
+have at least Create, Read list, Update and Delete). The other screens in each
+module are static with sample data, but navigatable and not dead.
+
 ---
 
-## Week 6 — Navigation (this is the requirement people fail)
+## Week 6 — Navigation verification (this is the requirement people fail)
 
-Requirement 2 says the system must be *navigable*. Split the sweep four ways.
+Week 3 should have wired every Figma screen into the navigation. Week 6 is the
+audit: verify no dead links exist. Split the sweep four ways, one member per
+sidebar.
 
-> Read CLAUDE.md. Go through `app/views/partials/sidebar-community.php` and list
-> every `href`. For each, check whether a matching route exists in `config/routes/`.
-> Report which links currently 404. Do not fix anything yet — just give me the list.
+> Read CLAUDE.md. Go through every sidebar (`sidebar-community.php`,
+> `sidebar-org.php`, `sidebar-gn.php`, `sidebar-blood-bank.php`,
+> `sidebar-admin.php`) and list every `href`. For each, check whether a matching
+> route exists in `config/routes/` and renders a page. Report any 404s or broken
+> links. Do not fix anything yet — just give the list.
 
-Then, for each dead link, either wire it or build a static placeholder page:
+Then, fix the remaining issues:
 
-> Create a static placeholder view for the Impact Report screen matching the
-> Figma layout, using hardcoded sample data. Add the route and a controller
-> method that just renders it. Label nothing as "coming soon" — it should look
-> like a finished screen.
+> For any 404: either the route is missing, the controller method is missing, or
+> the view is missing. Add what's needed so the link renders a page (it was built
+> in week 3, so you are wiring it in, not building it). Add the route,
+> controller method, and view if needed — they should already exist as static
+> pages with sample data.
 
-**Also this week:**
-- Guest browse pages for all four modules with gated buttons
-- The "Sign in required" modal
-- The long landing page content
-- Verify 404 and 403 pages render properly
+**Final checks:**
+- Every sidebar link opens a live page (no 404)
+- Every form renders (create, edit, filters) without errors
+- Guest and signed-in user can both navigate their respective screens
+- Error pages (404, 403, 500) render without PHP errors
+- Rehearse end-to-end: Guest landing → Register → Admin approves → User logs in
+  → Creates item → Edits item → Browses own items → Details page → (if built)
+  rating/feedback flow
 
 ---
 
@@ -182,7 +367,20 @@ repeats the CRUD portion for their own module. Time it. Practise it twice.
 
 ---
 
-## Prompts that work vs prompts that don't
+## Week 3 — Prompts for frontend render-out
+
+No backend yet. The goal is to show the Figma layout with sample data, wired
+into the navigation.
+
+| Weak | Strong |
+|---|---|
+| "Build all cleanup screens" | "Render the cleanup browse, create, detail, and edit screens matching cleanup.svg, with sample data and placeholder forms" |
+| "Make the form work" | "Build the HTML form for cleanup create matching the Figma, with title, date, category dropdown (5 sample options), city dropdown (5 cities), and submit button. No backend — the button just redirects back" |
+| "Add the pages to navigation" | "Wire `/org/cleanup`, `/org/cleanup/create`, `/cleanup/{id}` into routes as static views. Add them to sidebar-org.php so they appear in the link list" |
+
+---
+
+## Weeks 4–5 — Prompts for backend CRUD implementation
 
 | Weak | Strong |
 |---|---|
@@ -215,7 +413,10 @@ group projects die.
 
 Every Sunday, 15 minutes, all four:
 1. Everyone pulls `main` and confirms the app still loads
-2. Each demos their CRUD in the browser
-3. Anything broken gets fixed before new work starts
+2. **Week 3:** Each member opens their module's screens and clicks through the
+   navigation — does every link work? Do all forms render? Any 404s?
+3. **Weeks 4–5:** Each member demos their CRUD in the browser (create, read list,
+   update, delete) with real data
+4. Anything broken gets fixed before new work starts
 
 A broken `main` on Monday costs the whole group a week.
