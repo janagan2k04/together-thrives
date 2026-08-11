@@ -121,23 +121,6 @@ This means the required services are running.
 
 ---
 
-# 6. Install Project Dependencies
-
-Open Command Prompt inside the project folder.
-
-For XAMPP:
-
-```bash
-cd C:\xampp\htdocs\tt
-```
-
-For WAMP:
-
-```bash
-cd C:\wamp64\www\tt
-```
-
----
 
 # 7. Create the `.env` File
 
