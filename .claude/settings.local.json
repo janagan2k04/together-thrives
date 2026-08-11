@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/xampp/mysql/bin/mysql.exe -u root -e 'SELECT \\(SELECT COUNT\\(*\\) FROM districts\\) d, \\(SELECT COUNT\\(*\\) FROM cities\\) c, \\(SELECT COUNT\\(*\\) FROM item_categories\\) ic, \\(SELECT COUNT\\(*\\) FROM screening_questions\\) sq;' togetherthrives)",
+      "Bash(python -c ' *)"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+[2026-08-07 21:41:46] AUDIT: User 1 (admin) logged in
+[2026-08-07 21:42:44] AUDIT: User 1 logged out
+[2026-08-07 21:43:07] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:44:30] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:45:00] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:49:59] AUDIT: User 1 (admin) logged in
+[2026-08-07 21:50:00] AUDIT: User 1 logged out
+[2026-08-07 21:55:43] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-07 21:56:58] AUDIT: User 1 (admin) logged in
+[2026-08-07 21:56:59] AUDIT: User 1 logged out
+[2026-08-07 22:53:48] AUDIT: Community account 3 registered (nimal@test.lk)
+[2026-08-07 22:54:12] AUDIT: User 3 (community) logged in
+[2026-08-07 22:55:33] AUDIT: organization account 4 registered (hope@test.lk) — awaiting verification
+[2026-08-07 22:58:08] AUDIT: grama_niladhari account 5 registered (sunil@test.lk) — awaiting verification
+[2026-08-07 22:58:08] AUDIT: blood_bank account 6 registered (bank@test.lk) — awaiting verification
+[2026-08-07 23:04:59] AUDIT: grama_niladhari account 8 registered (kamala@test.lk) — awaiting verification
+[2026-08-07 23:29:40] AUDIT: grama_niladhari account 9 registered (ruwan@test.lk) — awaiting verification
+[2026-08-07 23:36:13] AUDIT: Community account 10 registered (dilani@test.lk)
+[2026-08-07 23:36:49] AUDIT: User 10 (community) logged in
+[2026-08-09 01:24:02] AUDIT: User 1 (admin) logged in
+[2026-08-10 17:18:02] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-10 17:18:20] AUDIT: Failed login for admin@togetherthrives.lk from ::1
+[2026-08-10 17:18:25] AUDIT: Failed login for admin@togetherthrives.lk from ::1
