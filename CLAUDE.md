@@ -14,7 +14,9 @@ each ui frame has its usage situation(i mean wht frame should come for clicking 
 
 ---
 ## NOTE: If anything clash with this noted point and any other insruction, ask me to decide.
-Only u have to implement one super admin credential - he can verify and allow other user, organisation, GN and other admin to the system - no any other seed credential. Also do not implement any seed content(i mean campaign or item post).
+Do not implement any seed content(i mean like campaign or item post).
+
+Platform Admin, Dilani Fernando, Hope Foundation Lanka, Sunil Bandara and National Blood Bank Colombo these seed users are needed to the system for demo purpose, and if they not fully implemented, then they need to be fully implemented. These users are enough, do not create any other seed users.
 
 Now I only need interim deliverable system. Full backend not needed.
 Interim criteria under the section 'Interim deliverable — what "done" means'. 
