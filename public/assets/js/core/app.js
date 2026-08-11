@@ -45,5 +45,11 @@ document.addEventListener('input', (e) => {
   if (out) out.textContent = `${area.value.length}/${area.maxLength}`;
 });
 
+// admin sidebar collapse
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('[data-sidebar-toggle]')) return;
+  document.querySelector('.app-shell')?.classList.toggle('is-collapsed');
+});
+
 // auto-hide flash messages
 setTimeout(() => document.querySelectorAll('.alert--success').forEach(a => a.remove()), 6000);

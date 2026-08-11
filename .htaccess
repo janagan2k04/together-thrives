@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------------------
+# The project sits inside htdocs, so Apache would otherwise serve the whole
+# tree at http://localhost/tt/... — including .env, database/schema.sql, the
+# PHP source, and every uploaded NIC scan in storage/uploads.
+#
+# Only public/ is meant to be reachable. It re-grants access in its own
+# .htaccess, so this denial applies to everything except the front controller.
+#
+# On a real host the document root would point at public/ and this file would
+# be unnecessary. It is here because XAMPP serves htdocs directly.
+# ---------------------------------------------------------------------------
+
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order deny,allow
+  Deny from all
+</IfModule>
+
+Options -Indexes

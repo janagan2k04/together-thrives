@@ -56,6 +56,8 @@ class RegistrationService
         }
 
         Logger::audit("Community account {$id} registered ({$data['email']})");
+        $this->sendEmailVerification($id, $data['email']);
+
         return $id;
     }
 
@@ -165,6 +167,25 @@ class RegistrationService
         }
 
         Logger::audit("{$role} account {$userId} registered ({$data['email']}) — awaiting verification");
+        $this->sendEmailVerification($userId, $data['email']);
+
         return $userId;
+    }
+
+    /**
+     * Issue the address-confirmation link for a freshly created account.
+     *
+     * Deliberately outside the transaction and wrapped in a catch: by this point
+     * the account exists and is usable, so a failure to mint a token must not
+     * undo a completed registration or throw a 500 at someone who just signed
+     * up successfully. A fresh link can always be issued later.
+     */
+    private function sendEmailVerification(int $userId, string $email): void
+    {
+        try {
+            (new EmailVerificationService())->issue($userId, $email);
+        } catch (\Throwable $e) {
+            Logger::error("Could not issue verification link for account {$userId}: " . $e->getMessage());
+        }
     }
 }

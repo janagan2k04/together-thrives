@@ -49,6 +49,34 @@ class OrgVerificationController extends Controller
         ]);
     }
 
+    /**
+     * Stream the proof document for one pending account.
+     *
+     * The shared /file/{path} route cannot carry a two-segment path, so review
+     * documents are fetched by account id and the path is read from the row —
+     * which also means the id is the only thing the browser ever sends.
+     */
+    public function document(string $id): void
+    {
+        $row = $this->users->pendingVerification((int) $id);
+        if (!$row) {
+            $this->abort(404, 'That request is no longer pending.');
+        }
+
+        $path = match ($row['role']) {
+            ROLE_ORGANIZATION => $row['org_document'],
+            ROLE_GN           => $row['gn_document'],
+            ROLE_BLOOD_BANK   => $row['bank_document'],
+            default           => $row['nic_document_path'],
+        };
+
+        if (!$path) {
+            $this->abort(404, 'No document was uploaded with this registration.');
+        }
+
+        (new \Controllers\FileController())->stream($path);
+    }
+
     public function approve(string $id): void
     {
         if ($this->verification->approve((int) $id, (int) auth()['id'])) {

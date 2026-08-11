@@ -1,5 +1,0 @@
-[2026-08-07 21:33:30] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:33:38] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:37:14] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:37:35] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:37:36] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\auth\login.php:15

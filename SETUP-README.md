@@ -10,28 +10,36 @@ PHP 8 · MySQL · MVC · XAMPP
 1. **Clone into XAMPP**
    ```
    cd C:/xampp/htdocs
-   git clone <repo-url> togetherthrives
+   git clone <repo-url> tt
    ```
+   The folder name becomes part of your URL, so if you clone it as something other
+   than `tt`, use that name in step 3 and step 5 as well.
 
 2. **Create the database**
    - Open http://localhost/phpmyadmin
    - Import `database/schema.sql`
    - Import `database/seeds/seed.sql`
+   - **Do not import `database/migrations/`** — see `database/README.md`
 
 3. **Configure**
    ```
    copy .env.example .env
    ```
-   Edit `.env` if your MySQL user/password differs from `root` / empty.
-
-4. **Install packages** (needed from week 2 for email)
+   Set `BASE_URL` to match the folder you cloned into. This is the step people miss,
+   and every link in the app comes out wrong when it is not set:
    ```
-   composer install
+   BASE_URL=http://localhost/tt/public
    ```
+   Also edit the `DB_*` lines if your MySQL user/password differs from `root` / empty.
 
-5. **Open** http://localhost/togetherthrives/public
+4. **Open** http://localhost/tt/public
 
    Admin login: `admin@togetherthrives.lk` / `Admin@123`
+
+`composer install` is **not** needed. `composer.json` lists PHPMailer, Dompdf and
+Ratchet for later phases, but nothing in the project imports them yet and there is
+no `vendor/` directory — the autoloader is our own. Do not add packages without
+asking the group.
 
 ---
 
@@ -84,6 +92,11 @@ class CleanupEvent extends Model
 ```php
 protected bool $softDelete = false;
 ```
+
+Most of those tables have **no `updated_at` either**, and that one is sharper:
+`Model::update()` appends `updated_at = NOW()` unconditionally, so calling it on
+such a table is a SQL error, not a silent no-op. Write the query yourself with
+`Database::run()`. `database/README.md` has the query to check your own tables.
 
 ## Writing a controller
 
@@ -138,4 +151,17 @@ For update and delete, HTML forms can only POST — use the method spoof:
 - Every POST/PUT/DELETE form includes `csrf_field()`
 - Never concatenate user input into SQL — use `Database::run($sql, $params)`
 - Uploads go through `FileUploader::store()`, never `move_uploaded_file()` directly
-- `storage/` is outside the web root; serve files through `FileController`
+- Serve uploaded files through `FileController`, never by linking at `storage/`
+
+**`storage/` is NOT outside the web root.** The project lives in `htdocs`, so Apache
+would happily serve `http://localhost/tt/storage/uploads/<file>.pdf`, `/.env` and
+`/app/core/*.php` to anyone — no login, bypassing every check in the application.
+It did exactly that until a root `.htaccess` was added that denies everything, with
+`public/.htaccess` granting itself back. Two things follow:
+
+- Do not delete or "tidy" the root `.htaccess`.
+- When you build anything that touches private files, test the **direct URL** as
+  well as the app route. A 403 there is the only proof your access control holds.
+
+Never commit anything from `storage/uploads/` or `storage/logs/` — real identity
+documents and audit logs with email addresses. `.gitignore` covers both.

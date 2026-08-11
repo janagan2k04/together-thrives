@@ -2,6 +2,19 @@
 
 Week 1 scaffold is done. This is how to get from there to the interim demo.
 
+> **Status: weeks 1 and 2 are complete, and weeks 3–5 are under way.** All four
+> account types register, the admin approves them, and each lands on its own
+> dashboard with its own sidebar. Password reset and email verification are built
+> too. Of the four CRUDs, **M4 · Reuse is done** — all five sessions below, plus
+> the request flow its detail page depends on. **M1 · Cleanup, M2 · Donation and
+> M3 · Blood are still to build.** Sections "Week 2" and "Weeks 3–5" below are kept
+> as the method; the outcome, the decisions taken, the gaps that remain and the
+> open actions are all in `WEEK1-CHECKLIST.md`.
+>
+> Read the *Gotchas* list in that file before starting your own module. Four more
+> tables turned out to be missing timestamp columns the base `Model` assumes, and
+> that is the kind of thing that costs an afternoon each time it is rediscovered.
+
 ---
 
 ## 0. One-time setup (30 minutes, do this together)
@@ -95,6 +108,9 @@ log in, each lands on the right dashboard with the right sidebar.
 ## Weeks 3–5 — The four CRUDs (fully parallel)
 
 Each member, same five sessions. Example is M1 / Cleanup Event; substitute your own.
+M4 · Reuse has been through all five — `app/controllers/reuse/`,
+`app/models/reuse/` and `app/views/reuse/` are a worked example of the shape
+these sessions produce, if you would rather read one than start cold.
 
 ### Session 1 — Model + Read (list)
 > Read CLAUDE.md and `database/schema.sql` (cleanup_events table).

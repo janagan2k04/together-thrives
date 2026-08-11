@@ -196,18 +196,20 @@ DB_DATABASE=togetherthrives
 # 11. Import the Database Schema
 
 
-Look inside the project for a `.sql` files:
+Look inside the project for the `.sql` files:
 ```text
 database/
-    schema.sql
-
-database/migrations
-    2026_......sql
-
+    schema.sql        <- import this first
 database/seeds
-    seed.sql
-    
+    seed.sql          <- then this
+database/migrations
+    2026_......sql    <- do NOT import on a fresh database
 ```
+
+Import **schema.sql then seed.sql** — those two only. The file in `migrations/`
+has already been folded into `schema.sql`; importing it on a fresh database fails
+with `ERROR 1060: Duplicate column name`. It applies only to a database created
+before 2026-08-11. See `database/README.md`.
 
 
 In phpMyAdmin:
@@ -219,7 +221,8 @@ In phpMyAdmin:
 5. Click **Import / Go**.
 6. Wait until phpMyAdmin confirms that the import was successful.
 
-Import all sql files one by one.
+Repeat for `seeds/seed.sql`. Those two files are the whole import — not the
+migration, as noted above.
 
 After importing, the database tables should appear under:
 
@@ -242,7 +245,42 @@ http://localhost/tt/public/index.php
 
 ---
 
-# 13. If the Application Does Not Open
+# 13. Sign In Accounts
+
+Sign in at `http://localhost/tt/public/login`.
+
+**Only the administrator comes from the seed file.** After importing
+`schema.sql` + `seed.sql` on a fresh machine, that is the *only* account you
+will have. The other four below were registered through the real sign-up forms
+during testing — recreate them yourself at `/register` if you want them, or
+just sign in as the admin.
+
+| Name | Role | Email | Password | Status |
+|---|---|---|---|---|
+| Platform Admin | Administrator | `admin@togetherthrives.lk` | `Admin@123` | active — **seeded** |
+| Dilani Fernando | Community Member | `dilani@test.lk` | `Passw0rd1` | active |
+| Hope Foundation Lanka | Organization | `hope@test.lk` | `Passw0rd1` | active (approved by the admin) |
+| Sunil Bandara | Grama Niladhari | `sunil@test.lk` | `Passw0rd1` | **pending** — cannot sign in yet |
+| National Blood Bank Colombo | Blood Bank | `bank@test.lk` | `Passw0rd1` | **rejected** — cannot sign in |
+
+The last two are deliberately left in those states so the admin verification
+queue is not empty and the rejected-account path can be demonstrated. They are
+*supposed* to be refused at sign-in with an explanation — that is the feature
+working, not a broken password. Approve Sunil from
+`/admin/verification` while signed in as the admin and he will sign in
+normally.
+
+Community accounts skip verification, which is why Dilani can sign in the
+moment she registers; organizations, GN officers and blood banks land on
+`pending` and wait for the administrator.
+
+> These are throwaway local test credentials for a development database on
+> `localhost`. If this project is ever deployed anywhere real, change the
+> administrator password first — it is in a file that ships with the repo.
+
+---
+
+# 14. If the Application Does Not Open
 
 Check the following:
 
@@ -289,7 +327,7 @@ DB_PASSWORD=
 ```
 
 
-# 14. Git Setup for Group Members
+# 15. Git Setup for Group Members
 
 After setting up the project, create a feature branch before making changes.
 
@@ -314,7 +352,7 @@ git checkout -b feature/donation-module
 
 ---
 
-# 15. Push Your Changes
+# 16. Push Your Changes
 
 After completing your work:
 
@@ -341,14 +379,32 @@ Do not directly push development work to `main`.
 ---
 
 
-# 16. Files That Must NOT Be Uploaded to GitHub
+# 17. Files That Must NOT Be Uploaded to GitHub
 
 Do not commit:
 
 ```text
 .env
+storage/uploads/
+storage/logs/
+```
 
+`.env` holds database credentials and local configuration.
 
-The `.env` file may contain database credentials and other local configuration.
+`storage/uploads/` holds **real identity documents** — NIC scans, registration
+certificates, blood bank licences uploaded during registration. These must never
+reach GitHub; once pushed they stay in the history even after deletion.
+
+`storage/logs/` holds audit logs containing account email addresses.
+
+`.gitignore` covers all three. But note that `.gitignore` only stops *new* files
+being tracked — anything already staged stays staged. If `git status` shows files
+under `storage/`, untrack them before pushing:
+
+```bash
+git rm --cached -r storage/uploads storage/logs
+```
+
+The files stay on your disk; this only stops git carrying them.
 
 ---

@@ -7,6 +7,7 @@ use Core\Request;
 use Core\Session;
 use Models\District;
 use Models\Organization;
+use Services\EmailVerificationService;
 use Services\RegistrationService;
 
 /**
@@ -71,10 +72,12 @@ class AuthController extends Controller
     ];
 
     private RegistrationService $registration;
+    private EmailVerificationService $emailVerification;
 
     public function __construct()
     {
-        $this->registration = new RegistrationService();
+        $this->registration      = new RegistrationService();
+        $this->emailVerification = new EmailVerificationService();
     }
 
     // ---------------------------------------------------------------- sign in
@@ -256,6 +259,25 @@ class AuthController extends Controller
             fn(?array $doc) => $this->registration->registerBloodBank($data, $doc),
             'Please upload your blood bank licence or an equivalent official document.'
         );
+    }
+
+    /**
+     * Redeem a confirmation link. Reachable signed in or signed out, because the
+     * link is usually opened from a mail client in a different browser.
+     *
+     * An invalid token is not an error page — the visitor did nothing wrong, and
+     * a 404 here reads as if the whole site is broken.
+     */
+    public function verifyEmail(string $token): void
+    {
+        $user = $this->emailVerification->confirm($token);
+
+        $this->view('auth.verify-email', [
+            'title'         => $user ? 'Email Confirmed' : 'Link No Longer Valid',
+            'confirmed'     => $user !== null,
+            'email'         => $user['email'] ?? '',
+            'awaitingAdmin' => $user !== null && $user['status'] === STATUS_PENDING,
+        ], 'auth-centre');
     }
 
     public function submitted(): void

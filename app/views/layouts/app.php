@@ -20,7 +20,10 @@
     <?php
       $sidebar = match (Auth::role()) {
           ROLE_ADMIN        => 'sidebar-admin',
-          ROLE_ORGANIZATION, ROLE_BLOOD_BANK => 'sidebar-org',
+          ROLE_ORGANIZATION => 'sidebar-org',
+          // Blood banks shared the org sidebar until week 2 closed, which meant
+          // being shown /org/* links that answer 403 to this role.
+          ROLE_BLOOD_BANK   => 'sidebar-blood-bank',
           ROLE_GN           => 'sidebar-gn',
           default           => 'sidebar-community',
       };

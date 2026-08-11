@@ -31,6 +31,9 @@ CREATE TABLE users (
   email          VARCHAR(150) NOT NULL UNIQUE,
   phone          VARCHAR(15),
   nic            VARCHAR(15),
+  -- Scan of the applicant's NIC, uploaded at community registration. Added by
+  -- migration 2026_08_07; folded in here so a fresh import needs no migration.
+  nic_document_path VARCHAR(255) NULL,
   password_hash  VARCHAR(255) NOT NULL,
   role           ENUM('community','organization','grama_niladhari','blood_bank','admin')
                  NOT NULL DEFAULT 'community',

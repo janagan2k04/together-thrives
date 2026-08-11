@@ -16,12 +16,18 @@ class Auth
             return false;
         }
 
-        if ($user['status'] === STATUS_SUSPENDED) {
-            Session::flash('error', 'This account has been suspended. Contact support.');
-            return false;
-        }
-        if ($user['status'] === STATUS_PENDING) {
-            Session::flash('error', 'Your account is awaiting administrator verification.');
+        // Only an active account may sign in. Written as an allow-list on
+        // purpose: a denied status that nobody remembered to list here would
+        // otherwise be let straight through, which is how STATUS_REJECTED was
+        // able to sign in before the admin verification queue was tested.
+        if ($user['status'] !== STATUS_ACTIVE) {
+            Session::flash('error', match ($user['status']) {
+                STATUS_SUSPENDED => 'This account has been suspended. Contact support.',
+                STATUS_PENDING   => 'Your account is awaiting administrator verification.',
+                STATUS_REJECTED  => 'Your registration was not approved. Contact support.',
+                default          => 'This account cannot sign in. Contact support.',
+            });
+            Logger::audit("Blocked login for {$email} — status {$user['status']}");
             return false;
         }
 

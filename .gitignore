@@ -1,1 +1,19 @@
 .env
+
+# Uploaded identity documents — NIC scans, registration certificates, blood
+# bank licences. Real people's documents must never reach a shared repo.
+storage/uploads/*
+!storage/uploads/.gitkeep
+
+# Runtime logs (audit.log records account emails)
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Scratch space
+storage/tmp/
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -65,6 +65,8 @@
   text-transform: uppercase; color: var(--muted-3);
 }
 
+.app-shell.is-collapsed .sidebar--admin { display: none; }
+
 /* ---------- page header ---------- */
 .admin-main { background: var(--surface-2); padding: var(--s-6) var(--s-8); }
 .admin-head { display: flex; align-items: flex-start; gap: var(--s-4); margin-bottom: var(--s-6); }
@@ -157,6 +159,7 @@
   padding: var(--s-5) var(--s-6); border-bottom: 1px solid var(--line-2);
   display: flex; align-items: center; gap: var(--s-3);
 }
+.detail-card__head .icon { width: 19px; height: 19px; flex: none; color: var(--brand); }
 .detail-card__head strong { font-size: var(--fs-lg); color: var(--ink); }
 .detail-card__body { padding: var(--s-5) var(--s-6); }
 
@@ -175,7 +178,9 @@
   background: var(--field-bg); color: var(--ink-2);
 }
 .doc-link:hover { border-color: var(--brand); background: var(--brand-tint); }
-.doc-link__icon { color: var(--brand); display: flex; }
+.doc-link__icon { color: var(--brand); display: flex; flex: none; }
+.doc-link__icon .icon { width: 22px; height: 22px; }
+.decision .icon, .detail-card__body .btn .icon { width: 16px; height: 16px; }
 .doc-link strong { display: block; font-size: var(--fs-base); color: var(--ink); }
 .doc-link small  { font-size: var(--fs-sm); color: var(--muted-3); }
 

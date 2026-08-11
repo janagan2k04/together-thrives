@@ -20,6 +20,9 @@ return function (Router $r) {
 
         $r->get('/verification',               'Admin\OrgVerificationController@index');
         $r->get('/verification/{id}',          'Admin\OrgVerificationController@show');
+        // Router compiles {param} to ([^/]+), so the shared /file/{path} route
+        // cannot match "folder/name.pdf". Serve review documents by account id.
+        $r->get('/verification/{id}/document', 'Admin\OrgVerificationController@document');
         $r->post('/verification/{id}/approve', 'Admin\OrgVerificationController@approve', ['csrf']);
         $r->post('/verification/{id}/reject',  'Admin\OrgVerificationController@reject',  ['csrf']);
 
