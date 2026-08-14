@@ -260,15 +260,27 @@ just sign in as the admin.
 | Platform Admin | Administrator | `admin@togetherthrives.lk` | `Admin@123` | active — **seeded** |
 | Dilani Fernando | Community Member | `dilani@test.lk` | `Passw0rd1` | active |
 | Hope Foundation Lanka | Organization | `hope@test.lk` | `Passw0rd1` | active (approved by the admin) |
-| Sunil Bandara | Grama Niladhari | `sunil@test.lk` | `Passw0rd1` | **pending** — cannot sign in yet |
-| National Blood Bank Colombo | Blood Bank | `bank@test.lk` | `Passw0rd1` | **rejected** — cannot sign in |
+| Sunil Bandara | Grama Niladhari | `sunil@test.lk` | `Passw0rd1` | active (approved by the admin) |
+| National Blood Bank Colombo | Blood Bank | `bank@test.lk` | `Passw0rd1` | active (approved by the admin) |
 
-The last two are deliberately left in those states so the admin verification
-queue is not empty and the rejected-account path can be demonstrated. They are
-*supposed* to be refused at sign-in with an explanation — that is the feature
-working, not a broken password. Approve Sunil from
-`/admin/verification` while signed in as the admin and he will sign in
-normally.
+**All five now sign in.** Sunil and the blood bank were previously left `pending`
+and `rejected` so the admin verification queue was not empty; both have since
+been approved, because the weeks 4–5 CRUD work needs them able to sign in —
+`/my/donations` is gated to organisations and Grama Niladharis, and `/my/blood`
+to organisations and blood banks.
+
+To demonstrate the verification queue or the rejected-account path again, either
+register a new account at `/register` and leave it pending, or set a status back
+by hand:
+
+```sql
+UPDATE users SET status = 'pending'  WHERE email = 'sunil@test.lk';
+UPDATE users SET status = 'rejected' WHERE email = 'bank@test.lk';
+```
+
+A pending or rejected account is *supposed* to be refused at sign-in with an
+explanation — that is the feature working, not a broken password. Approve from
+`/admin/verification` while signed in as the admin.
 
 Community accounts skip verification, which is why Dilani can sign in the
 moment she registers; organizations, GN officers and blood banks land on
@@ -381,30 +393,39 @@ Do not directly push development work to `main`.
 
 # 17. Files That Must NOT Be Uploaded to GitHub
 
-Do not commit:
+Never commit:
 
 ```text
 .env
-storage/uploads/
-storage/logs/
 ```
 
-`.env` holds database credentials and local configuration.
+`.env` holds database credentials and local configuration. It is the one thing
+`.gitignore` excludes outright.
 
-`storage/uploads/` holds **real identity documents** — NIC scans, registration
-certificates, blood bank licences uploaded during registration. These must never
-reach GitHub; once pushed they stay in the history even after deletion.
+### `storage/uploads/` and `storage/logs/` **are** committed — deliberately
 
-`storage/logs/` holds audit logs containing account email addresses.
+This surprises people, so it is worth stating plainly. Both are tracked
+(17 upload files, 4 log files), and `.gitignore` says why in a comment: every
+contributor needs the seed accounts' proof documents, or the admin verification
+queue has nothing to review and the demo cannot be shown.
 
-`.gitignore` covers all three. But note that `.gitignore` only stops *new* files
-being tracked — anything already staged stays staged. If `git status` shows files
-under `storage/`, untrack them before pushing:
+**That is only safe while they are made-up test documents.** The rule that
+follows from it:
+
+> If you ever register with a **real** NIC scan, licence or certificate, untrack
+> it before you push. Once pushed it stays in the history even after deletion.
 
 ```bash
-git rm --cached -r storage/uploads storage/logs
+git rm --cached storage/uploads/nic-documents/<the-file>
 ```
 
-The files stay on your disk; this only stops git carrying them.
+The file stays on your disk; this only stops git carrying it. The same goes for
+`storage/logs/`, which records real account email addresses — fine for the five
+seed accounts, not fine for anyone else's.
+
+If the group later decides the documents should not be in the repo at all, the
+change is one line in `.gitignore` plus
+`git rm --cached -r storage/uploads storage/logs` — but then whoever clones next
+has to re-register the seed accounts by hand.
 
 ---

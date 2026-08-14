@@ -47,6 +47,15 @@ Request flow: `index.php → Router → Middleware → Controller → Service �
 
 If a task seems to need a change here, **stop and say so** instead of editing.
 
+**Two exceptions, both granted explicitly after the bug was reported** — the rule
+still stands, these are not a precedent:
+- `config/routes/web.php` — `/file/{path}` → `/file/{folder}/{name}`, because a
+  router param is `([^/]+)` and could never match a stored `folder/name.ext` path
+- `app/core/App.php` — `renderError()` now sends the status line itself for codes
+  `http_response_code()` cannot express, so a CSRF failure answers 419 not 500
+
+Both are written up in `WEEK1-CHECKLIST.md` under "Two bugs found and fixed".
+
 ---
 
 ## Module ownership
@@ -274,7 +283,16 @@ if ($file = \Core\Request::file('cover_image')) {
     $data['cover_image'] = FileUploader::store($file, 'events', ['jpg','png','webp'], 5);
 }
 ```
-Never call `move_uploaded_file()` directly. Display with `upload_url($path)`.
+Never call `move_uploaded_file()` directly. Display with `upload_url($path)` —
+it builds `/file/folder/name.ext`, and `FileController` streams the file **only
+to the account that uploaded it, or to an admin**.
+
+So `upload_url()` is for private documents. Anything meant to be **public** —
+item photos, for one — must not go through it, or the owner check will hide it
+from everyone else. Serve those by row id instead, the way `/reuse/image/{id}`
+does. A stored path is always two segments, which is why the route takes
+`{folder}` and `{name}`: a single `{param}` compiles to `([^/]+)` and can never
+hold a slash.
 
 ---
 
@@ -292,21 +310,39 @@ Never call `move_uploaded_file()` directly. Display with `upload_url($path)`.
 ## Interim deliverable — what "done" means
 
 1. Login + signup working for all account types ✅ (weeks 1–2)
-2. **All Figma UIs implemented and navigatable** (no dead links, no 404s) — week 3
+2. **All Figma UIs implemented and navigatable** (no dead links, no 404s) — week 3 ✅
    - Every screen from the Figma renders as HTML/CSS matching the layout and design intent (good enough is OK, not pixel-perfect)
    - No backend required — forms don't save, just redirect
    - Every sidebar link works and opens a page
    - Includes: all CRUD module screens, dashboards, profiles, settings, notifications, messaging, support, disaster reporting, payment checkout (sandbox)
    - Use Figma designs in `UI/` folder as reference for layout, not as a pixel spec
-3. Each member: **one CRUD entity fully working** (Create, Read list/detail, Update, Delete) — weeks 4–5
-   - M1 · Dilsha: CleanupEvent
-   - M2 · Janudi: DonationRequest
-   - M3 · Shenol: BloodCampaign
+3. Each member: **one CRUD entity fully working** (Create, Read list/detail, Update, Delete) — weeks 4–5 ✅
+   - M1 · Dilsha: CleanupEvent ✅ (done, incl. its admin review queue)
+   - M2 · Janudi: DonationRequest ✅ (done, incl. its `requested_items` child rows)
+   - M3 · Shenol: BloodCampaign ✅ (done)
    - M4 · Janagan: ReuseItem ✅ (done, plus the three gaps)
+
+   All four share one shape: create → `pending` → an admin approves → public.
+   Editing an approved row returns it to `pending`; delete is a soft delete plus
+   a `cancelled` status; each module declares its own admin review queue in its
+   **own** route file. CleanupEvent maps this onto a narrower ENUM — `draft` is
+   its "pending" and a rejection is `cancelled` + `cancel_reason`. The details
+   are in `WEEK1-CHECKLIST.md`.
+
+4. **Navigation audit** — week 6 ✅
+   The app was crawled as all six callers (guest + the five roles), following
+   every in-app link: 328 page loads, three dead links found and fixed, all 67
+   form actions matched against the router, no page leaking a PHP notice, and
+   both arms of the end-to-end flow passing. **Zero 404s reachable from any link.**
 
 **The difference from "finished UI":** All Figma screens must exist and be
 clickable, even if only the one CRUD per member has backend. Unbuilt screens
 show with sample data. A broken link is not acceptable.
+
+**Keeping it that way:** if you add a link, open it as the role that will see it.
+Two of the three dead links found in week 6 were links shown to a role that was
+never gated out of drawing them — the page rendered fine for its author and 403'd
+for everyone else.
 
 ---
 

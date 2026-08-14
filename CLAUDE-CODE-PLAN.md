@@ -2,20 +2,43 @@
 
 Week 1 scaffold is done. This is how to get from there to the interim demo.
 
-> **Status: weeks 1 and 2 are complete.** All four account types register, the
-> admin approves them, and each lands on its own dashboard with its own sidebar.
-> Password reset and email verification are built. Week 3 will render all Figma
-> screens as static pages with sample data. Weeks 4–5 will add backend to one
-> CRUD per member in parallel. Of the four CRUDs, **M4 · Reuse is already
-> complete** with full backend including the gaps (ratings, admin GS letter
-> review, and My Activities). **M1 · Cleanup, M2 · Donation and M3 · Blood need
-> both frontend (week 3) and backend CRUD (weeks 4–5).** The outcome, the
-> decisions taken, the gaps, and the open actions for Reuse are all in
-> `WEEK1-CHECKLIST.md`.
+> **Status: weeks 1–3 complete. Weeks 4–5: three modules of four done.**
+> All four account types register, the admin approves them, and each lands on its
+> own dashboard with its own sidebar. Password reset and email verification work.
+> **Week 3 is finished** — every Figma screen renders and there are no dead links
+> in any of the five role sidebars.
 >
-> Read the *Gotchas* list in that file before starting your own module. Four more
-> tables turned out to be missing timestamp columns the base `Model` assumes, and
-> that is the kind of thing that costs an afternoon each time it is rediscovered.
+> Backend CRUD so far:
+>
+> | Member | Entity | Status |
+> |---|---|---|
+> | M4 · Janagan | `reuse_items` | ✅ done (plus ratings, GS letter review, My Activities) |
+> | M3 · Shenol | `blood_campaigns` | ✅ done |
+> | M2 · Janudi | `donation_requests` + `requested_items` | ✅ done |
+> | M1 · Dilsha | `cleanup_events` | ✅ done (incl. its admin review queue) |
+>
+> **All four are in.** They follow the same shape: create → `pending` → admin
+> approves → public; edit an approved row and it goes back to `pending`; delete is
+> a soft delete plus a `cancelled` status. Each module declares its own admin
+> review queue in its own route file. **Read "The pattern all four modules follow"
+> in `WEEK1-CHECKLIST.md`** — it is the shape that worked four times. M1 had to
+> map it onto a narrower ENUM (`draft` is its "pending", a rejection is
+> `cancelled` + `cancel_reason`); that is written up in the M1 weeks 4–5 section.
+>
+> **Week 6 and the full system test are done as well.** The app was crawled as
+> all six callers and every link resolves; then auth, the authorization matrix,
+> all four CRUD lifecycles, validation and security were tested end to end. Two
+> real bugs surfaced and were fixed — a dead `/file` route and a CSRF failure
+> answering 500 — both in frozen files, both with permission. **The interim
+> deliverable is complete.**
+>
+> The decisions taken, the worked example, the gaps closed, the test results and
+> open actions are all in `WEEK1-CHECKLIST.md`.
+>
+> Read the *timestamp columns* rule in that file before starting your own module.
+> Several tables are missing columns the base `Model` assumes — one of them
+> (`requested_items`) has no `created_at`, so even `create()` fails on it. That is
+> the kind of thing that costs an afternoon each time it is rediscovered.
 
 ---
 
@@ -182,35 +205,39 @@ All shared screens (across all roles):
 **M2 · Janudi — Donation module screens only**
 - Browse requests, create form, detail, edit, pledge flow, status flow, activities
 
-**M3 · Shenol — Blood module screens only** ⏳ *part-built — see below*
+**M3 · Shenol — Blood module screens only** ✅ *complete — see below*
 - Campaign browse, detail, screening form, eligibility, appointment, activities
 
 **Workload split:** M4 ~50%, M1 ~15%, M2 ~15%, M3 ~15%, landing page ~5%**
 
 ---
 
-### M3 · Blood — part-built, paused mid-way
+### M3 · Blood — done ✅
 
-The scaffolding, routes, sample data, stylesheet and the two community browse
-screens are done. **Eight views are still to write.** Full hand-over notes,
-including the exact file list and the frame each view comes from, are in
-`WEEK1-CHECKLIST.md` under "Week 3 — M3 · Blood (part-built)".
+All 12 frames in `UI/Blood/` render and every route answers. Hand-over notes and
+the decisions taken are in `WEEK1-CHECKLIST.md` under "Week 3 — M3 · Blood".
 
-Live now (verified by URL):
+> **Weeks 4–5 update:** `blood_campaigns` now has full working CRUD — the
+> organiser screens below write for real, and `/blood` and `/blood/{id}` read
+> approved camps from the database. The remaining blood screens (critical
+> requests, screening, certificates) are still sample data and say so on screen.
+> See "M3 · Blood — `blood_campaigns` CRUD" in `WEEK1-CHECKLIST.md`.
 
-- [x] `/blood` — hub, all five tabs (All · Upcoming Camps · Critical Requests · My Donations · My Registrations)
-- [x] `/blood/{id}` — camp detail
+Community:
 
-Still 500, view file missing:
+- [x] `/blood` — hub, five tabs (All · Upcoming Camps · Critical Requests · My Donations · My Registrations)
+- [x] `/blood/{id}` — camp detail, with Join
+- [x] `/blood/critical/create` — post a critical blood request
+- [x] `/blood/critical/{id}` — critical request detail, with I Can Donate
+- [x] `/blood/{id}/screening` and `/blood/critical/{id}/screening` — 14-question medical screening
+- [x] `/blood/screening/submitted` — confirmation, carrying the eligibility verdict
+- [x] `/blood/certificate/{id}` — A4 appreciation certificate (own layout, print-ready)
 
-- [ ] `/my/blood` — organiser campaign list
-- [ ] `/my/blood/create` and `/my/blood/{id}/edit` — campaign form
-- [ ] `/my/blood/{id}` — organiser campaign detail with registered donors
-- [ ] `/blood/critical/create` — post a critical blood request
-- [ ] `/blood/critical/{id}` — critical request detail
-- [ ] `/blood/{id}/screening` — medical screening form
-- [ ] `/blood/screening/submitted` — screening confirmation
-- [ ] `/blood/certificate/{id}` — appreciation certificate
+Organiser (blood bank + organization):
+
+- [x] `/my/blood` — campaign list, camps and urgent requests in one table
+- [x] `/my/blood/create` and `/my/blood/{id}/edit` — campaign form
+- [x] `/my/blood/{id}` — campaign detail with reach counters and registered donors
 
 
 **System pages:** ✅ (verified by URL — see `WEEK1-CHECKLIST.md`)
@@ -249,10 +276,82 @@ Still 500, view file missing:
 - [x] Payment / checkout (sandbox) + receipt
 - [x] Search
 
-**Still open at the end of M4's week 3:** `/cleanup` and `/donations` answer 500
-— their controllers do not exist. They are M1 and M2's week 3 screens, and they
-are linked from sidebars that are now otherwise complete. `/blood` is live; the
-rest of M3's module is part-built and listed above.
+**Nothing is still open.** `/donations` was the last dead link and it is built.
+Every entry in all five role sidebars now opens a page, for every role.
+
+---
+
+### M1 · Cleanup — done ✅
+
+All ten frames in `UI/Cleanup/` render, every route answers, and both forms
+validate against the real frozen-schema columns without writing.
+
+Community (`/cleanup` and `/cleanup/{id}` are open to guests):
+
+- [x] `/cleanup` — browse, All · Joined tabs, impact strip, location/category/status filters
+- [x] `/cleanup/{id}` — campaign detail with Join
+- [x] `/cleanup/create` — community proposal form
+- [x] `/cleanup/{id}/join` — volunteer sign-up, emergency contact, skills
+- [x] `/cleanup/{id}/feedback` — star-rating feedback form
+- [x] `/cleanup/certificate/{id}` — A4 appreciation certificate (blank layout, print-ready)
+
+Organisation:
+
+- [x] `/org/cleanup` — campaign list with status, period, volunteer and reach columns
+- [x] `/org/cleanup/create` and `/org/cleanup/{id}/edit` — the two-page form (`?step=2`)
+- [x] `/org/cleanup/{id}` — campaign detail: stats, group chat, impact, Edit / Cancel
+- [x] `/org/cleanup/{id}/volunteers` — registered volunteers and attendance
+
+The two Dengue frames in `UI/Cleanup/` are already served by `/dengue`, which M4
+built for every role — no separate cleanup screen was added for them.
+
+**~~One decision the group still owes weeks 4–5~~ — settled in weeks 4–5:**
+`cleanup_events.organization_id` is NOT NULL and points at `organizations`, but
+Cleanup-User.svg gives community members a Create Campaign screen. The ruling was
+to keep campaigns **organisation-owned** and leave that screen as a *proposal*
+that validates and stores nothing, saying so on the page — no schema change, no
+invented proxy organisation.
+
+---
+
+### M2 · Donation — done ✅
+
+All ten frames in `UI/Donation/` render and every route answers.
+
+> **Weeks 4–5 update:** `donation_requests` now has full working CRUD, including
+> the `requested_items` child rows an item request owns. The requester screens
+> below write for real, and `/donations` and `/donations/{id}` read approved
+> requests from the database. Reserving, paying, receipts and the donor wall are
+> still sample data and say so on screen. See "M2 · Donation —
+> `donation_requests` CRUD" in `WEEK1-CHECKLIST.md`.
+
+Community (`/donations` and `/donations/{id}` are open to guests):
+
+- [x] `/donations` — browse, All · Item · Fund · My Donations tabs, impact strip, filters
+- [x] `/donations/{id}` — item-request detail with per-item Reserve
+- [x] `/donations/{id}` — fund-request detail with amount picker and donor list
+- [x] `/donations/{id}/checkout` — sandbox Secure Payment
+- [x] `/donations/{id}/receipt` — Payment Success & Receipt
+
+Requester — organisation **and** Grama Niladhari, the two values of
+`donation_requests.requester_type`:
+
+- [x] `/my/donations` — request list with type and status filters
+- [x] `/my/donations/create` and `/{id}/edit` — one form, `?type=items|funds`
+- [x] `/my/donations/{id}` — items detail: requirement table, disaster info, timeline
+- [x] `/my/donations/{id}` — funds detail: money split, donor activity, org notes
+
+**Both open questions are now settled by the weeks 4–5 backend:**
+
+1. ~~**The create form has no title field in the Figma**, but
+   `donation_requests.title` is `NOT NULL`.~~ ✅ The added title field is kept and
+   is now what actually gets stored. Every list and card prints it.
+2. ~~**`donation_requests.status` allows `rejected`**, which has no constant.~~
+   ✅ Resolved without touching `config/constants.php`: the admin queue writes
+   the existing **`MOD_REJECTED`** constant, which is already the string
+   `'rejected'`. Rejecting also fills `reject_reason`, and the requester's own
+   detail screen prints that reason back to them. No new constant, no half-used
+   value.
 
 **Approach:** Copy the layout pattern from Reuse module (already complete).
 Reuse its CSS classes (`.card`, `.table`, `.field`, `.badge`, `.btn--*`),
@@ -317,10 +416,26 @@ Insert 3 test rows manually in phpMyAdmin to have something to display.
 **After each session:** commit, push, and tell your group it's merged.
 
 **Interim is done when:** all four modules have at least one CRUD working
-end-to-end (working example: Reuse Item from Janagan is complete; Cleanup Event
-from Dilsha, Donation Request from Janudi, Blood Campaign from Shenol must each
-have at least Create, Read list, Update and Delete). The other screens in each
-module are static with sample data, but navigatable and not dead.
+end-to-end. **All four are there** — Reuse Item (Janagan) ✅, Blood Campaign
+(Shenol) ✅, Donation Request (Janudi) ✅, Cleanup Event (Dilsha) ✅ — each with
+Create, Read list, Read detail, Update and Delete. The other screens in each
+module are static with sample data, but navigatable and not dead. **The week 6
+navigation audit is done too** — the app was crawled as all six callers, the
+three dead links it turned up were fixed, and both arms of the end-to-end flow
+pass. The interim deliverable is complete.
+
+**Two extra things each of the four modules needed**, which the five sessions
+above do not mention — budget a sixth session for them:
+
+- **An admin review queue.** All three entities start life `pending`, so without
+  a screen that approves them the public list is empty forever. Each module put
+  its queue in its own route file (`/admin/reuse/letters`, `/admin/blood/campaigns`,
+  `/admin/donations`) and added one badged link to `partials/sidebar-admin.php`.
+- **Rewiring the week 3 views.** The sample-data arrays used friendly keys that
+  do not exist as columns (`where`, `blurb`, `detail`, `urgency`, `requested_on`).
+  Swapping in the model means editing every view in the module, not just the two
+  CRUD screens — and deciding, field by field, whether something with no column
+  gets dropped or kept with a hint. Do not fabricate a figure to fill a panel.
 
 ---
 
