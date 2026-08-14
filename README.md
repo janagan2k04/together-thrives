@@ -1,5 +1,5 @@
 # TogetherThrives
-2nd Year Grp Project hi
+2nd Year Grp Project
 
 # TogetherThrives — Local Setup Guide (XAMPP / WAMP)
 
