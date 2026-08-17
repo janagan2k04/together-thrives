@@ -10,3 +10,5 @@ storage/tmp/
 .idea/
 Thumbs.db
 desktop.ini
+
+vendor/
