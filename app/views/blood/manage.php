@@ -56,6 +56,7 @@ $badgeClass = fn (string $status) => match ($status) {
     </div>
   <?php else: ?>
     <div class="card">
+      <div class="table-scroll">
       <table class="camp-table">
         <thead>
           <tr>
@@ -94,6 +95,7 @@ $badgeClass = fn (string $status) => match ($status) {
         <?php endforeach; ?>
         </tbody>
       </table>
+      </div>
     </div>
   <?php endif; ?>
 </div>

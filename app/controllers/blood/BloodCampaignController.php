@@ -1,23 +1,32 @@
 <?php
 namespace Controllers\Blood;
 
+use Core\Auth;
 use Core\Controller;
 use Core\Request;
 use Core\Session;
+use Models\Blood\BloodCampaign;
 use Models\City;
 use Services\BloodSampleData;
 
 /**
- * MEMBER 3 — Blood Donation. Week 3: every screen renders from
- * `Services\BloodSampleData`; nothing is written.
+ * MEMBER 3 — Blood Donation.
  *
- * `blood_campaigns` is the frozen table this module's weeks 4–5 CRUD will use.
- * The create and edit forms below already validate against its real columns and
- * ENUMs, so wiring the model in later is a matter of replacing the flash with
- * `$this->campaigns->create($data)`.
+ * The organiser side (manage/detail/create/store/edit/update/destroy) now
+ * reads and writes `blood_campaigns` for real through the BloodCampaign
+ * model. The community side (index/show/join) still renders from
+ * `BloodSampleData` — browse/screening/critical-request wiring is a
+ * separate piece of work, not part of this CRUD entity.
  */
 class BloodCampaignController extends Controller
 {
+    private BloodCampaign $campaigns;
+
+    public function __construct()
+    {
+        $this->campaigns = new BloodCampaign();
+    }
+
     /** The tabs across the community hub. */
     private const TABS = [
         'all'           => 'All',
@@ -88,24 +97,30 @@ class BloodCampaignController extends Controller
 
     public function manage(): void
     {
+        $rows = $this->campaigns->forOrganizer(Auth::id());
+
+        $status = (string) (Request::get('status') ?? '');
+        if ($status !== '') {
+            $rows = array_values(array_filter($rows, fn ($r) => $r['status'] === $status));
+        }
+
         $this->view('blood.manage', [
             'title' => 'My Blood Campaigns',
-            'rows'  => BloodSampleData::organiserRows(),
+            'rows'  => $rows,
         ]);
     }
 
     /** Organiser's view of one campaign: stats, details, registered donors. */
     public function detail(string $id): void
     {
-        $row = BloodSampleData::organiserRow($id);
+        $row = $this->campaigns->findForOrganizer((int) $id, Auth::id());
         if (!$row) {
             $this->abort(404, 'Campaign not found.');
         }
 
         $this->view('blood.detail', [
-            'title'  => $row['title'],
-            'row'    => $row,
-            'donors' => BloodSampleData::registeredDonors(),
+            'title' => $row['title'],
+            'row'   => $row,
         ]);
     }
 
@@ -116,15 +131,22 @@ class BloodCampaignController extends Controller
 
     public function store(): void
     {
-        $this->validateCampaign();
+        $data = $this->validateCampaign();
 
-        Session::flash('info', 'Campaign validated. Saving arrives with the blood backend in weeks 4–5 — nothing was stored.');
+        $data['organizer_id']    = Auth::id();
+        $data['organizer_type']  = Auth::role(); // 'organization' or 'blood_bank' — matches organizer_type ENUM
+        $data['auto_group_chat'] = Request::post('auto_group_chat') ? 1 : 0;
+        $data['status']          = 'pending';
+
+        $this->campaigns->create($data);
+
+        Session::flash('success', 'Campaign submitted for admin verification.');
         $this->redirect('/my/blood');
     }
 
     public function edit(string $id): void
     {
-        $row = BloodSampleData::organiserRow($id);
+        $row = $this->campaigns->findForOrganizer((int) $id, Auth::id());
         if (!$row) {
             $this->abort(404, 'Campaign not found.');
         }
@@ -134,23 +156,36 @@ class BloodCampaignController extends Controller
 
     public function update(string $id): void
     {
-        if (!BloodSampleData::organiserRow($id)) {
+        $row = $this->campaigns->findForOrganizer((int) $id, Auth::id());
+        if (!$row) {
             $this->abort(404, 'Campaign not found.');
         }
 
-        $this->validateCampaign();
+        $data = $this->validateCampaign();
+        $data['auto_group_chat'] = Request::post('auto_group_chat') ? 1 : 0;
+        // Editing sends it back for re-approval, same rule the other CRUD
+        // modules use (create -> pending -> admin approves -> public).
+        $data['status'] = 'pending';
 
-        Session::flash('info', 'Changes validated. Saving arrives with the blood backend in weeks 4–5 — nothing was changed.');
+        $this->campaigns->update((int) $id, $data);
+
+        Session::flash('success', 'Campaign updated and resubmitted for verification.');
         $this->redirect('/my/blood');
     }
 
     public function destroy(string $id): void
     {
-        if (!BloodSampleData::organiserRow($id)) {
+        $row = $this->campaigns->findForOrganizer((int) $id, Auth::id());
+        if (!$row) {
             $this->abort(404, 'Campaign not found.');
         }
 
-        Session::flash('info', 'Cancelling a campaign arrives with the blood backend in weeks 4–5.');
+        // Soft delete plus a cancelled status, the same shape every CRUD
+        // module in this project uses.
+        $this->campaigns->update((int) $id, ['status' => 'cancelled']);
+        $this->campaigns->delete((int) $id);
+
+        Session::flash('success', 'Campaign cancelled.');
         $this->redirect('/my/blood');
     }
 
@@ -171,21 +206,20 @@ class BloodCampaignController extends Controller
     }
 
     /**
-     * Validated against the real `blood_campaigns` columns, so weeks 4–5 keeps
-     * this method as-is. `blood_types` is the one field with no column — the
-     * Figma asks which groups are needed and the table has nowhere to put it,
-     * so it is collected and dropped, the same call the group made on the
-     * week 2 registration forms.
+     * Validated against the real `blood_campaigns` columns. `blood_types` is
+     * collected on the form but has no column, so it is not in these rules —
+     * same treatment as the week 2 registration forms gave it. `end_date` was
+     * dropped for the same reason: no column, and the form no longer asks
+     * for it.
      */
-    private function validateCampaign(): void
+    private function validateCampaign(): array
     {
-        $this->validate([
+        return $this->validate([
             'title'         => 'required|max:160',
             'description'   => 'required|max:2000',
             'venue'         => 'required|max:255',
             'city_id'       => 'required|integer',
             'campaign_date' => 'required|date',
-            'end_date'      => 'required|date',
             'start_time'    => 'required',
             'end_time'      => 'required',
             'target_donors' => 'required|integer|min_value:1',

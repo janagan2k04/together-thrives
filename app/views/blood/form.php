@@ -38,7 +38,7 @@ $checkedGroups = old('blood_types') ?: ($row['blood_types'] ?? []);
     </div>
   </div>
 
-  <form method="post" action="<?= e($action) ?>">
+  <form class="blood-form" method="post" action="<?= url($action) ?>">
     <?= csrf_field() ?>
     <?php if ($method === 'PUT'): ?><?= method_field('PUT') ?><?php endif; ?>
 
