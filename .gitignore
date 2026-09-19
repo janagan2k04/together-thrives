@@ -1,0 +1,9 @@
+.env
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+vendor/
