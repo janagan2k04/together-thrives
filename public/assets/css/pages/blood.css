@@ -1,0 +1,454 @@
+/* =========================================================
+   Blood Donation - Member 3.
+
+   Covers the community hub, camp and critical-request detail,
+   the medical screening form, the organiser's campaign list and
+   detail, the create/edit form, and the appreciation certificate.
+
+   Tokens only. Red is this module's accent, the way green is the
+   platform's and purple is the admin's - all three already exist
+   in base/variables.css, so nothing new is introduced here.
+   ========================================================= */
+
+/* ---------- page heading ---------- */
+.blood-head { display: flex; align-items: flex-start; gap: var(--s-4); margin-bottom: var(--s-5); }
+.blood-head__icon {
+  width: 42px; height: 42px; flex: none; border-radius: var(--r-md);
+  background: var(--red-tint); color: var(--red);
+  display: grid; place-items: center;
+}
+.blood-head__icon .icon { width: 24px; height: 24px; }
+.blood-head__text { flex: 1; }
+.blood-head h1 { font-size: var(--fs-2xl); font-weight: 700; color: var(--ink); }
+.blood-head p  { margin-top: 2px; font-size: var(--fs-base); color: var(--muted); }
+
+.blood-back {
+  display: inline-flex; align-items: center; gap: 7px; margin-bottom: var(--s-3);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--red);
+}
+.blood-back .icon { width: 16px; height: 16px; }
+
+/* ---------- "Your Impact" strip ---------- */
+.impact-strip {
+  display: inline-flex; flex-wrap: wrap; gap: var(--s-3); padding: var(--s-4);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  margin-bottom: var(--s-5);
+}
+.impact-strip__label {
+  width: 100%; font-size: var(--fs-base); font-weight: 700; color: var(--ink);
+  margin-bottom: var(--s-3);
+}
+.impact-tile { min-width: 150px; padding: var(--s-4); border-radius: var(--r-md); border: 1px solid transparent; }
+.impact-tile strong { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--ink); line-height: 1.1; }
+.impact-tile span   { display: block; margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); }
+.impact-tile--red   { background: var(--red-tint);   border-color: #f6d5d5; }
+.impact-tile--green { background: var(--green-tint); border-color: var(--green-tint-2); }
+.impact-tile--amber { background: var(--amber-tint); border-color: #f6e3ca; }
+.impact-tile--blue  { background: var(--blue-tint);  border-color: #d8e1f5; }
+
+/* ---------- tab bar ---------- */
+.blood-tabs {
+  display: flex; align-items: center; gap: var(--s-6);
+  border-bottom: 1px solid var(--line-2); margin-bottom: var(--s-5);
+}
+/* :not(.btn) - the call-to-action at the end of the bar is an anchor too, and
+   without this it inherits the tab's padding and muted colour. */
+.blood-tabs a:not(.btn) {
+  padding: 0 0 12px; border-bottom: 2px solid transparent;
+  font-size: var(--fs-base); font-weight: 600; color: var(--muted);
+}
+.blood-tabs a:not(.btn):hover { color: var(--ink-2); }
+.blood-tabs a.is-active { color: var(--red); border-bottom-color: var(--red); }
+.blood-tabs .btn { margin-bottom: 8px; }
+.blood-tabs__spacer { flex: 1; }
+
+/* ---------- blood group markers ---------- */
+.group-dot {
+  width: 42px; height: 42px; flex: none; border-radius: var(--r-pill);
+  background: var(--red-tint); color: var(--red);
+  display: grid; place-items: center;
+  font-size: var(--fs-sm); font-weight: 700;
+}
+.group-dot .icon { width: 19px; height: 19px; }
+.group-tag {
+  display: inline-block; padding: 2px 10px; border-radius: var(--r-pill);
+  background: var(--red-tint); color: var(--red);
+  font-size: var(--fs-xs); font-weight: 700;
+}
+.group-big { font-size: var(--fs-3xl); font-weight: 700; color: var(--red); line-height: 1; }
+
+/* ---------- section cards (title/sub) ----------
+   The pastel square that used to sit before every heading came off on
+   2026-09-13: it carried no icon and no meaning, only colour. */
+.sec {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); overflow: hidden;
+}
+.sec__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) var(--s-5); }
+.sec__head strong { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.sec__head small  { display: block; margin-top: 1px; font-size: var(--fs-sm); color: var(--muted-3); }
+.sec__head .sec__spacer { flex: 1; }
+.sec__body { padding: 0 var(--s-5) var(--s-5); }
+.sec__body--flush { padding: 0; }
+.sec__body > p { font-size: var(--fs-base); color: var(--ink-2); }
+
+/* boxed read-only value, the Figma's "field that is not a field" */
+.readout { display: grid; gap: 5px; }
+.readout__label { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em;
+                  text-transform: uppercase; color: var(--muted-3); }
+.readout__value { padding: 11px 14px; border: 1px solid var(--line);
+                  border-radius: var(--r-md); background: var(--surface-2);
+                  font-size: var(--fs-base); color: var(--ink); }
+.readout-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+.readout-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.readout-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* ---------- upcoming camps list ---------- */
+.camp-row { display: flex; align-items: center; gap: var(--s-4);
+            padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--line-2); }
+.camp-row:last-child { border-bottom: 0; }
+.camp-row__thumb { width: 96px; height: 64px; flex: none; border-radius: var(--r-md);
+                   background: var(--surface-3); }
+.camp-row__body { flex: 1; min-width: 0; }
+.camp-row__body h3 { font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+.camp-row__meta { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-top: 5px;
+                  font-size: var(--fs-xs); color: var(--muted-3); }
+.camp-row__meta span { display: inline-flex; align-items: center; gap: 5px; }
+.camp-row__meta .icon { width: 14px; height: 14px; }
+.camp-row__side { display: grid; gap: 7px; justify-items: stretch; flex: none; }
+
+.countdown {
+  flex: none; padding: 4px 12px; border-radius: var(--r-pill);
+  border: 1px solid; font-size: var(--fs-xs); font-weight: 600;
+}
+.countdown--green { border-color: var(--green); color: var(--green-dark); background: var(--green-tint); }
+.countdown--amber { border-color: var(--amber); color: var(--amber-dark); background: var(--amber-tint); }
+.countdown--blue  { border-color: var(--blue);  color: var(--blue);       background: var(--blue-tint); }
+.countdown--red   { border-color: var(--red);   color: var(--red-dark);   background: var(--red-tint); }
+
+/* ---------- critical request cards ---------- */
+.crit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+.crit-card { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-lg);
+             background: var(--surface); display: grid; gap: var(--s-3); }
+.crit-card__top { display: flex; align-items: center; gap: var(--s-3); }
+.crit-card__top .group-big { font-size: var(--fs-xl); }
+.crit-card__units { font-size: var(--fs-sm); color: var(--muted); }
+.crit-card__meta { display: grid; gap: 6px; font-size: var(--fs-xs); color: var(--muted-3); }
+.crit-card__meta span { display: inline-flex; align-items: center; gap: 6px; }
+.crit-card__meta .icon { width: 14px; height: 14px; }
+.crit-card__due { color: var(--red); font-weight: 600; }
+.crit-card__actions { display: flex; gap: 8px; }
+.crit-card__actions .btn { flex: 1; }
+
+.priority { padding: 3px 10px; border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 700; }
+.priority--red   { background: var(--red-tint);   color: var(--red-dark); }
+.priority--amber { background: var(--amber-tint); color: var(--amber-dark); }
+
+/* red primary button - this module's call to action */
+.btn--blood { background: var(--red); border: 1px solid var(--red); color: #fff; }
+.btn--blood:hover { background: var(--red-dark); border-color: var(--red-dark); }
+.btn--amber { background: var(--amber); border: 1px solid var(--amber); color: #fff; }
+.btn--amber:hover { background: var(--amber-dark); border-color: var(--amber-dark); }
+
+/* components/ui.css lays .alert out as a row, which is right for a one-line
+   notice. These carry a heading over a sentence, so they stack. */
+.alert--stack { display: block; }
+.alert--stack strong { display: block; }
+.alert--stack p { margin-top: 3px; }
+
+/* ---------- registration progress ---------- */
+.progress { height: 8px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.progress__bar { height: 100%; border-radius: var(--r-pill); background: var(--red); }
+.progress-note { margin-top: 7px; font-size: var(--fs-sm); color: var(--red); font-weight: 600; }
+
+/* ---------- eligibility / tips lists ---------- */
+.tick-list { display: grid; gap: 9px; list-style: none; }
+.tick-list--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tick-list li { position: relative; padding-left: 16px; font-size: var(--fs-sm); color: var(--ink-2); }
+.tick-list li::before { content: ''; position: absolute; left: 2px; top: 7px;
+                        width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--green); }
+.tick-list--amber li::before { background: var(--amber); }
+.tick-list--red   li::before { background: var(--red); }
+
+.step-list { display: grid; gap: 10px; list-style: none; counter-reset: step; }
+.step-list li { position: relative; padding-left: 26px; font-size: var(--fs-sm); color: var(--ink-2); }
+.step-list li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: 0; top: 1px;
+  width: 17px; height: 17px; border-radius: var(--r-pill);
+  background: var(--red-tint); color: var(--red);
+  font-size: 10px; font-weight: 700; line-height: 17px; text-align: center;
+}
+
+/* ---------- organiser: campaign list ---------- */
+/* The organiser's posted-campaign table. Sized up on 2026-09-18: every cell on
+   it was --fs-xs or --fs-sm, which is footnote size for the screen an organiser
+   runs their camps from. Column widths are fixed so the five columns line up
+   down the table instead of being re-measured per row by the content. */
+.camp-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.camp-table col.camp-col--details  { width: 34%; }
+.camp-table col.camp-col--status   { width: 12%; }
+.camp-table col.camp-col--schedule { width: 20%; }
+.camp-table col.camp-col--reach    { width: 20%; }
+.camp-table col.camp-col--actions  { width: 14%; }
+.camp-table th {
+  padding: 12px var(--s-4); text-align: left; background: var(--surface-2);
+  border-bottom: 1px solid var(--line-2);
+  font-size: var(--fs-sm); font-weight: 700; letter-spacing: .03em;
+  text-transform: uppercase; color: var(--muted-3);
+}
+/* `table-layout: fixed` above stops a cell widening for its content, so a long
+   unbroken venue name would spill out of the column rather than wrap. */
+.camp-table td { padding: var(--s-4); border-bottom: 1px solid var(--line-2); vertical-align: top;
+                 font-size: var(--fs-base); color: var(--ink-2); overflow-wrap: anywhere; }
+.camp-table tr:last-child td { border-bottom: 0; }
+.camp-cell { display: flex; gap: var(--s-3); }
+.camp-cell__body h3 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+                      font-size: var(--fs-lg); font-weight: 700; color: var(--ink);
+                      line-height: 1.35; }
+.camp-cell__where { display: flex; align-items: flex-start; gap: 6px; margin-top: 6px;
+                    font-size: var(--fs-sm); color: var(--muted-3); line-height: 1.45; }
+.camp-cell__where .icon { width: 15px; height: 15px; margin-top: 2px; }
+.camp-cell__blurb { margin-top: 8px; font-size: var(--fs-sm); color: var(--muted);
+                    line-height: 1.5; }
+
+/* Label and value on one baseline, with the labels in a column of their own so
+   Date, Time and Target read down the cell rather than each starting wherever
+   the row above happened to end. */
+.period-list { display: grid; gap: 7px; }
+.period-list div { display: grid; grid-template-columns: 62px 1fr; gap: 8px;
+                   align-items: baseline; font-size: var(--fs-sm); }
+.period-list dt { color: var(--muted-3); }
+.period-list dd { color: var(--ink-2); font-weight: 600; }
+
+/* Same shape as the schedule cell beside it: the figure in a fixed column, the
+   label after it, so the three numbers stack in a straight line. */
+.reach { display: grid; gap: 7px; }
+.reach div { display: grid; grid-template-columns: 34px 1fr; gap: 8px;
+             align-items: baseline; }
+.reach strong { font-size: var(--fs-base); font-weight: 700; color: var(--ink);
+                text-align: right; font-variant-numeric: tabular-nums; }
+.reach small  { font-size: var(--fs-sm); color: var(--muted-3); }
+
+/* ---------- organiser: campaign detail ---------- */
+.count-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-4);
+              margin-bottom: var(--s-5); }
+.count {
+  display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.count strong { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--ink); line-height: 1.1; }
+.count span   { display: block; margin-top: 2px; font-size: var(--fs-sm); color: var(--muted); }
+
+.donor-table { width: 100%; border-collapse: collapse; }
+.donor-table th {
+  padding: 11px var(--s-4); text-align: left; background: var(--surface-2);
+  border-bottom: 1px solid var(--line-2);
+  font-size: var(--fs-xs); font-weight: 700; color: var(--muted-3);
+}
+.donor-table td { padding: 11px var(--s-4); border-bottom: 1px solid var(--line-2);
+                  font-size: var(--fs-sm); color: var(--ink-2); }
+.donor-table tr:last-child td { border-bottom: 0; }
+.donor-cell { display: flex; align-items: center; gap: 10px; }
+.donor-cell strong { display: block; font-size: var(--fs-sm); color: var(--ink); }
+.donor-cell small  { font-size: var(--fs-xs); color: var(--muted-3); }
+.donor-hidden { color: var(--muted-3); font-style: italic; }
+
+.impact-boxes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); }
+.impact-boxes div { padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md);
+                    text-align: center; }
+.impact-boxes strong { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.impact-boxes small  { font-size: var(--fs-xs); color: var(--muted-3); }
+
+/* ---------- create / edit form ---------- */
+.type-pick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+             gap: var(--s-4); margin-bottom: var(--s-5); max-width: 760px; }
+.type-pick label { position: relative; }
+.type-pick input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+/* Only the span directly after the radio is the card. The label nests more
+   spans inside it, and a bare `.type-pick span` would give each of those its
+   own border and padding. */
+.type-pick input + span {
+  display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4);
+  border: 1px solid var(--field-border); border-radius: var(--r-lg); background: var(--surface);
+}
+.type-pick .icon { width: 22px; height: 22px; flex: none; }
+.type-pick strong { display: block; font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+.type-pick small  { display: block; margin-top: 2px; font-size: var(--fs-xs); color: var(--muted-3); }
+.type-pick input:checked + span { border-color: var(--brand); background: var(--brand-tint); }
+.type-pick--blood input:checked + span { border-color: var(--red); background: var(--red-tint); }
+
+.group-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.group-pick label { position: relative; }
+.group-pick input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.group-pick span {
+  display: block; padding: 6px 16px; border-radius: var(--r-pill);
+  border: 1px solid var(--field-border); background: var(--surface);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--ink-2);
+}
+.group-pick input:checked + span { border-color: var(--red); background: var(--red-tint); color: var(--red); }
+
+.form-foot {
+  display: flex; align-items: center; gap: var(--s-4);
+  margin-top: var(--s-5); padding: var(--s-4) var(--s-5);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.form-foot p { flex: 1; font-size: var(--fs-sm); color: var(--muted); }
+
+.notify-boxes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+.notify-boxes div { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-md); }
+.notify-boxes strong { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--ink); }
+.notify-boxes small  { font-size: var(--fs-xs); color: var(--muted-3); }
+.notify-boxes .is-red strong { color: var(--red); }
+
+/* ---------- screening form ---------- */
+.screen-hero {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: var(--s-5); margin-bottom: var(--s-5);
+  background: var(--red-tint); border: 1px solid #f6d5d5; border-radius: var(--r-lg);
+}
+.screen-hero__ico { width: 54px; height: 54px; flex: none; border-radius: var(--r-pill);
+                    background: var(--red); color: #fff; display: grid; place-items: center; }
+.screen-hero__ico .icon { width: 26px; height: 26px; }
+.screen-hero h1 { font-size: var(--fs-xl); font-weight: 700; color: var(--ink); }
+.screen-hero p  { margin-top: 3px; font-size: var(--fs-sm); color: var(--muted); }
+
+.q-row {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: 13px var(--s-4); border: 1px solid var(--line); border-radius: var(--r-md);
+  margin-bottom: 10px;
+}
+.q-row.is-invalid { border-color: var(--red); background: var(--red-tint); }
+.q-row__text { flex: 1; font-size: var(--fs-sm); color: var(--ink-2); }
+.q-row__answers { display: flex; gap: var(--s-4); flex: none; }
+.q-row__answers label { display: inline-flex; align-items: center; gap: 7px;
+                        font-size: var(--fs-sm); color: var(--ink-2); cursor: pointer; }
+
+.radio-row { display: flex; gap: var(--s-5); padding-top: 4px; }
+.radio-row label { display: inline-flex; align-items: center; gap: 8px;
+                   font-size: var(--fs-sm); color: var(--ink-2); cursor: pointer; }
+
+/* ---------- submitted ---------- */
+.done-card { max-width: 900px; margin: 0 auto; padding: var(--s-12) var(--s-5);
+             background: var(--surface); border: 1px solid var(--line);
+             border-radius: var(--r-lg); text-align: center; }
+.done-card__tick { width: 88px; height: 88px; margin: 0 auto var(--s-5);
+                   border-radius: var(--r-pill); background: var(--green-tint);
+                   display: grid; place-items: center; }
+.done-card__tick .inner { width: 68px; height: 68px; border-radius: var(--r-pill);
+                          background: var(--green-dark); color: #fff; display: grid; place-items: center; }
+.done-card__tick .icon { width: 34px; height: 34px; }
+.done-card h1 { font-size: var(--fs-2xl); font-weight: 700; color: var(--ink); }
+.done-card > p { margin-top: 8px; font-size: var(--fs-base); color: var(--muted); }
+.done-next { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+             gap: var(--s-5); margin: var(--s-5) 0; padding: var(--s-4) var(--s-5);
+             background: var(--green-tint); border-radius: var(--r-md); text-align: left; }
+.done-next > div { display: flex; gap: 10px; }
+.done-next__ico { width: 32px; height: 32px; flex: none; border-radius: var(--r-pill);
+                  background: var(--surface); color: var(--green-dark); display: grid; place-items: center; }
+.done-next__ico .icon { width: 16px; height: 16px; }
+.done-next strong { display: block; font-size: var(--fs-sm); color: var(--ink); }
+.done-next small  { font-size: var(--fs-xs); color: var(--muted); }
+.done-card__actions { display: flex; justify-content: center; gap: var(--s-4); }
+
+/* ---------- appreciation certificate ---------- */
+.blank-body { background: var(--surface-2); }
+.cert-page { padding: var(--s-8) var(--s-5); display: grid; gap: var(--s-4); justify-items: center; }
+.cert-actions { display: flex; gap: var(--s-3); }
+
+.cert {
+  width: 100%; max-width: 1040px; aspect-ratio: 297 / 210;
+  background: var(--surface); border-radius: var(--r-lg); overflow: hidden;
+  box-shadow: var(--shadow-md); display: flex; flex-direction: column;
+}
+/* The frame's red is the Figma page behind the sheet, not a header bar - the
+   certificate itself is white throughout, with a red rule under the heading. */
+.cert__band { padding: var(--s-6) var(--s-5) var(--s-5); text-align: center;
+              border-bottom: 3px solid var(--red); }
+.cert__brand { font-size: var(--fs-xl); font-weight: 700; color: var(--ink); }
+.cert__brand span { color: var(--brand); }
+.cert__tagline { margin-top: 5px; font-size: 10px; font-weight: 700;
+                 letter-spacing: .16em; color: var(--red-dark); }
+.cert__seal { width: 62px; height: 62px; margin: var(--s-4) auto 0;
+              border-radius: var(--r-pill); background: var(--red-tint); color: var(--red);
+              display: grid; place-items: center; }
+.cert__seal .icon { width: 28px; height: 28px; }
+.cert__title { margin-top: var(--s-4); font-size: var(--fs-2xl); font-weight: 700;
+               letter-spacing: .12em; color: var(--ink); }
+
+.cert__body { flex: 1; padding: var(--s-6) var(--s-8); text-align: center;
+              display: flex; flex-direction: column; }
+.cert__lead { font-size: var(--fs-sm); color: var(--muted); }
+.cert__name { margin: 6px auto 0; padding-bottom: var(--s-3); max-width: 70%;
+              border-bottom: 1px solid var(--line);
+              font-size: var(--fs-3xl); font-weight: 700; color: var(--ink); }
+.cert__for  { margin-top: var(--s-4); font-size: var(--fs-sm); color: var(--muted); }
+.cert__camp { margin-top: 4px; font-size: var(--fs-xl); font-weight: 700; color: var(--red); }
+.cert__where{ margin-top: 4px; font-size: var(--fs-xs); color: var(--muted-3); }
+
+.cert__facts { display: flex; justify-content: center; gap: var(--s-8);
+               margin: var(--s-5) auto 0; padding: var(--s-4) var(--s-6);
+               background: var(--surface-2); border-radius: var(--r-md); }
+.cert__facts > div { display: flex; align-items: center; gap: 10px; }
+.cert__facts .icon { width: 18px; height: 18px; color: var(--red); }
+.cert__facts strong { display: block; font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+.cert__facts small  { font-size: var(--fs-xs); color: var(--muted-3); }
+
+/* The two signature columns are gone by group decision - the sheet carries no
+   handwritten authority, and dropping them is what frees the room the
+   certificate id needs at the foot of a printed page. */
+
+.cert__id { display: inline-flex; align-items: center; gap: 8px; margin: var(--s-4) auto 0;
+            padding: 6px 14px; border-radius: var(--r-pill); background: var(--brand-tint);
+            font-size: var(--fs-xs); color: var(--muted-2); }
+/* With the signature columns gone nothing else claims the leftover height, so
+   the id strip takes the `margin-top: auto` that used to sit on .cert__signs
+   and settles at the foot of the sheet. */
+.cert__id--foot { margin-top: auto; }
+.cert__id .icon { width: 14px; height: 14px; color: var(--brand); }
+.cert__id strong { color: var(--ink); }
+
+/* Printing, i.e. Ctrl+P and "Save as PDF".
+ *
+ * `.cert` is sized by `aspect-ratio: 297/210` with `overflow: hidden`. Let the
+ * sheet run to the full width of an A4 page and that ratio makes it taller than
+ * the page, so the last thing in the body - the certificate id - was clipped
+ * away and never reached the PDF. Print sizes the sheet by the page box
+ * instead, and the tint behind the id is forced through: browsers drop
+ * background colours when printing unless told not to. */
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+
+  .cert-actions { display: none; }
+  .cert-page { padding: 0; display: block; }
+  .cert {
+    box-shadow: none; border-radius: 0; border: 0;
+    width: 100%; max-width: none;
+    aspect-ratio: auto; height: auto; min-height: 0;
+    overflow: visible; page-break-inside: avoid; break-inside: avoid;
+  }
+  .cert__body { padding: var(--s-5) var(--s-6); }
+
+  /* Never clip the id, and keep it readable once the tint is dropped. */
+  .cert__id {
+    display: inline-flex !important; visibility: visible !important;
+    margin-top: var(--s-5); border: 1px solid var(--line);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .cert__band { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+@media (max-width: 1100px) {
+  .crit-grid, .count-grid, .readout-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .done-next { grid-template-columns: 1fr; }
+  .camp-row { flex-wrap: wrap; }
+}
+@media (max-width: 700px) {
+  .crit-grid, .count-grid, .type-pick, .readout-grid, .readout-grid--3, .readout-grid--4,
+  .tick-list--2, .impact-boxes, .notify-boxes { grid-template-columns: 1fr; }
+  .impact-strip { display: block; }
+  .impact-tile { margin-bottom: var(--s-3); }
+  .q-row { flex-wrap: wrap; }
+  .blood-tabs { overflow-x: auto; }
+}
