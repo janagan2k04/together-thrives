@@ -1,9 +1,0 @@
-claude.md
-
-<!-- ## Week 7 — Demo prep
-
-**Seed realistic data.** Empty tables look broken.
-> Write `database/seeds/demo.sql` inserting 2 organizations, 1 GN officer,
-> 4 community users, 5 cleanup events across statuses, 4 donation requests,
-> 3 blood campaigns, 8 reuse items. Use realistic Sri Lankan names and cities. -->
-
