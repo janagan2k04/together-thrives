@@ -1,10 +1,5 @@
 .env
 
-#user's nic documnet and credential files are needed to push to the github, other github contributors also need that.
-
-# Scratch space
-storage/tmp/
-
 # Editor / OS noise
 .vscode/
 .idea/
