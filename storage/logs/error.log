@@ -1,8 +1,0 @@
-[2026-08-07 21:33:30] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:33:38] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:37:14] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:37:35] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\home\landing.php:163
-[2026-08-07 21:37:36] ERROR: Call to undefined function icon() @ C:\xampp\htdocs\tt\app\views\auth\login.php:15
-[2026-08-11 14:51:41] ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.nic_document_path' in 'field list' @ C:\xampp\htdocs\tt\app\core\Database.php:38
-[2026-08-11 14:52:13] ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.nic_document_path' in 'field list' @ C:\xampp\htdocs\tt\app\core\Database.php:38
-[2026-08-11 22:01:57] ERROR: DB connection failed: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
