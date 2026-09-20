@@ -1,0 +1,115 @@
+/* ---------- topbar ---------- */
+/* One bar for every signed-in role. It used to be padded to --page-pad (120px),
+   which pushed the brand a long way in from the corner while the admin bar -
+   its own override - sat tight to the edge. They are the same bar now, and the
+   logo starts in the corner for everyone. */
+.topbar {
+  display: flex; align-items: center; gap: var(--s-4);
+  height: 68px;
+  padding: 0 var(--s-6);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-2);
+}
+.topbar__spacer { flex: 1; }
+
+/* The signed-out bar keeps the old geometry: it sits above the landing hero,
+   which is laid out on --page-pad, and the two need to line up. --topbar-h
+   (84px) describes this bar, not the app one - variables.css is frozen, so the
+   app shell carries its 68px literally, here and in .app-shell below. */
+.topbar--guest {
+  gap: var(--s-6);
+  height: var(--topbar-h);
+  padding: 0 var(--page-pad);
+}
+
+/* Sidebar toggle. Every role gets one; it used to be admin-only, and it drew
+   the browser's default button chrome, which is the boxed look. */
+.nav-toggle {
+  flex: none;
+  display: grid; place-items: center;
+  width: 36px; height: 36px;
+  padding: 0; border: 0; background: none;
+  border-radius: var(--r-md);
+  color: var(--ink-2); cursor: pointer;
+}
+.nav-toggle:hover { background: var(--surface-3); }
+.nav-toggle .icon { width: 21px; height: 21px; }
+
+/* Sign out. Was a text-only ghost button for users and a bare icon for the
+   admin - one button now, icon plus label, readable as an action either way. */
+.btn-signout {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: 8px 14px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); color: var(--ink-2);
+  font-size: var(--fs-sm); font-weight: 500; font-family: inherit;
+  cursor: pointer;
+}
+.btn-signout:hover { background: var(--surface-3); color: var(--ink); }
+.btn-signout .icon { width: 17px; height: 17px; }
+.topbar__nav { display: flex; align-items: center; gap: var(--s-1); }
+.topbar__nav a {
+  padding: 8px 10px; border-radius: var(--r-md);
+  font-size: var(--fs-sm); font-weight: 500; color: var(--ink-2);
+}
+.topbar__nav a:hover { background: var(--surface-3); }
+.topbar__sep { width: 1px; height: 22px; background: var(--line); }
+.topbar__right { display: flex; align-items: center; gap: var(--s-3); }
+.logo { font-size: 19px; font-weight: 700; color: var(--ink); }
+.logo span { color: var(--brand); }
+.logo--light { color: #fff; }
+.logo--light span { color: var(--green); }
+
+.user-chip { display: flex; align-items: center; gap: var(--s-2); }
+.user-chip__avatar {
+  width: 34px; height: 34px; border-radius: var(--r-pill);
+  background: var(--brand-tint); color: var(--brand);
+  display: grid; place-items: center; font-weight: 700;
+}
+.user-chip__meta { display: flex; flex-direction: column; line-height: 1.2; }
+.user-chip__meta strong { font-size: var(--fs-sm); color: var(--ink); }
+.user-chip__meta small  { font-size: var(--fs-xs); color: var(--green-dark); }
+.icon-btn { padding: 8px; border-radius: var(--r-md); color: var(--muted-2); }
+.icon-btn:hover { background: var(--surface-3); }
+
+/* ---------- shell ---------- */
+.app-shell { display: flex; min-height: calc(100vh - 68px); }
+.app-main  { flex: 1; padding: var(--s-5) var(--s-6); }
+
+/* The toggle collapsed .sidebar--admin only, so pressing it as any other role
+   did nothing at all. Collapse whichever sidebar the role was given. */
+.app-shell.is-collapsed .sidebar { display: none; }
+
+.sidebar {
+  width: var(--sidebar-w); flex: none;
+  background: var(--surface); border-right: 1px solid var(--line-2);
+  padding: var(--s-4) var(--s-3);
+}
+.sidebar__link {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px; border-radius: var(--r-md);
+  font-size: var(--fs-sm); font-weight: 500; color: var(--ink-2);
+}
+.sidebar__link:hover { background: var(--surface-3); }
+/* Purple, the same active state the admin shell uses - the four role
+   sidebars were green and only the admin one was branded. */
+.sidebar__link.is-active { background: var(--brand-tint); color: var(--brand); font-weight: 600; }
+.sidebar__divider { margin: var(--s-2) 14px; }
+
+/* ---------- auth ---------- */
+.auth-body { display: grid; place-items: center; background: var(--surface-2); }
+.auth-wrap { width: 100%; max-width: 460px; padding: var(--s-8) var(--s-4); text-align: center; }
+.auth-logo { font-size: 24px; font-weight: 700; color: var(--ink); }
+.auth-logo span { color: var(--green-dark); }
+.auth-card {
+  margin-top: var(--s-6); padding: var(--s-8);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-xl); box-shadow: var(--shadow-sm); text-align: left;
+}
+.auth-foot { margin-top: var(--s-5); font-size: var(--fs-xs); color: var(--muted-3); }
+
+/* ---------- errors ---------- */
+.error-body { display: grid; place-items: center; }
+.error-card { text-align: center; padding: var(--s-10); }
+.error-card h1 { font-size: 64px; color: var(--brand); }
+.error-card p  { margin: var(--s-3) 0 var(--s-5); color: var(--muted); }
