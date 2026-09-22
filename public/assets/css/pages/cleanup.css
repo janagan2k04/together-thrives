@@ -1,0 +1,373 @@
+/* =========================================================
+   MEMBER 1 - Cleanup / Volunteering.
+   Covers the community browse and detail screens, the join and
+   feedback forms, the organiser's list, two-step create form,
+   campaign detail and the attendance table.
+
+   Shared furniture (.page-head, .split, .stack, .panel, .kv,
+   .stat-grid, .sample-note, .chip) comes from pages/shared.css;
+   the certificate reuses .cert* from pages/blood.css with the
+   .cert--cleanup modifier at the bottom of this file.
+
+   Colours are tokens from base/variables.css only. Green is this
+   module's accent, the way red is the blood module's.
+   ========================================================= */
+
+/* ---------- page heading with the pastel module square ---------- */
+.cl-head { display: flex; align-items: flex-start; gap: var(--s-4); margin-bottom: var(--s-5); }
+.cl-head__icon {
+  width: 46px; height: 46px; flex: none; display: grid; place-items: center;
+  border-radius: var(--r-lg); background: var(--green-tint); color: var(--green-dark);
+}
+.cl-head__icon .icon { width: 24px; height: 24px; }
+.cl-head__text { flex: 1; }
+.cl-head h1 { font-size: var(--fs-2xl); font-weight: 700; color: var(--ink); }
+.cl-head p  { margin-top: 2px; font-size: var(--fs-base); color: var(--muted); }
+.cl-head__actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+/* ---------- "Your Impact" strip ---------- */
+.cl-impact {
+  display: inline-flex; gap: var(--s-3); padding: var(--s-4);
+  margin-bottom: var(--s-5); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.cl-impact__label {
+  width: 100%; margin-bottom: 10px;
+  font-size: var(--fs-base); font-weight: 700; color: var(--ink);
+}
+.cl-tile { min-width: 150px; padding: var(--s-3) var(--s-4); border-radius: var(--r-md); border: 1px solid transparent; }
+.cl-tile strong { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--ink); line-height: 1.1; }
+.cl-tile span   { display: block; margin-top: 3px; font-size: var(--fs-sm); color: var(--muted); }
+.cl-tile--green { background: var(--green-tint); border-color: var(--green-tint-2); }
+.cl-tile--blue  { background: var(--blue-tint);  border-color: #d8e1f5; }
+
+/* ---------- tab bar (All · Joined) ---------- */
+.cl-tabs {
+  display: flex; align-items: flex-end; gap: var(--s-5);
+  margin-bottom: var(--s-4); border-bottom: 1px solid var(--line);
+}
+/* :not(.btn) - the call to action sits at the end of the same bar. */
+.cl-tabs a:not(.btn) {
+  padding-bottom: 10px; border-bottom: 2px solid transparent;
+  font-size: var(--fs-base); font-weight: 600; color: var(--muted-2);
+}
+.cl-tabs a:not(.btn):hover { color: var(--ink-2); }
+.cl-tabs a.is-active { color: var(--green-dark); border-bottom-color: var(--green); }
+.cl-tabs .btn { margin-bottom: 8px; }
+.cl-tabs__spacer { flex: 1; }
+
+/* ---------- filter bar ---------- */
+.cl-filters {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4); margin-bottom: var(--s-4);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.cl-filters select, .cl-filters input[type="search"] {
+  padding: 9px 12px; border: 1px solid var(--field-border); border-radius: var(--r-md);
+  background: var(--field-bg); color: var(--ink-2); font-size: var(--fs-sm);
+}
+.cl-filters select:focus, .cl-filters input:focus {
+  outline: none; background: var(--surface);
+}
+.cl-filters__spacer { flex: 1; }
+
+/* ---------- browse cards ---------- */
+.cl-list { display: grid; gap: var(--s-4); }
+.cl-card {
+  display: flex; align-items: stretch; gap: var(--s-4);
+  padding: var(--s-4); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.cl-card__media {
+  position: relative; width: 198px; flex: none; min-height: 138px;
+  border-radius: var(--r-md); background: var(--surface-3);
+  display: grid; place-items: center; overflow: hidden;
+}
+.cl-card__media .icon { width: 30px; height: 30px; color: var(--muted-3); }
+.cl-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.cl-card__badge { position: absolute; top: 10px; left: 10px; }
+.cl-card__body { flex: 1; min-width: 0; }
+.cl-card__body h3 { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.cl-card__body h3 a:hover { color: var(--green-dark); }
+.cl-card__where {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 4px;
+  font-size: var(--fs-sm); color: var(--muted);
+}
+.cl-card__where .icon { width: 14px; height: 14px; }
+.cl-card__blurb { margin-top: 8px; font-size: var(--fs-sm); color: var(--ink-2); }
+.cl-card__meta { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.cl-card__side {
+  width: 210px; flex: none; display: grid; gap: 8px;
+  align-content: center; justify-items: stretch; text-align: center;
+}
+.cl-card__pct { font-size: var(--fs-xl); font-weight: 700; color: var(--ink); line-height: 1.1; }
+.cl-card__pct small { display: block; font-size: var(--fs-xs); font-weight: 400; color: var(--muted-3); }
+.cl-card__share {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: var(--fs-sm); color: var(--muted);
+}
+.cl-card__share .icon { width: 14px; height: 14px; }
+
+/* fact pills under a card title and in the detail header */
+.cl-fact {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: var(--r-sm);
+  background: var(--surface-3); font-size: var(--fs-xs); color: var(--muted-2);
+}
+.cl-fact .icon { width: 13px; height: 13px; }
+
+/* status pill - one class per `cleanup_events.status` tone */
+.cl-status {
+  display: inline-flex; align-items: center; padding: 4px 10px;
+  border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 600;
+}
+.cl-status--green   { background: var(--green-tint-2); color: var(--green-dark); }
+.cl-status--amber   { background: var(--status-pending-bg); color: var(--status-pending-fg); }
+.cl-status--blue    { background: var(--blue-tint); color: var(--blue); }
+.cl-status--red     { background: var(--red-tint); color: var(--red-dark); }
+.cl-status--neutral { background: var(--surface-3); color: var(--muted); }
+
+/* ---------- progress bar (registration fill, campaign completion) ---------- */
+.cl-progress { height: 8px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.cl-progress__bar { height: 100%; border-radius: var(--r-pill); background: var(--green); }
+.cl-progress-note { margin-top: 7px; font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- numbered form sections ---------- */
+.cl-sec {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.cl-sec__head { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-4) var(--s-5); }
+.cl-sec__num {
+  width: 28px; height: 28px; flex: none; display: grid; place-items: center;
+  border-radius: var(--r-pill); background: var(--green); color: #fff;
+  font-size: var(--fs-sm); font-weight: 700;
+}
+.cl-sec__num--amber { background: var(--amber); }
+.cl-sec__num--blue  { background: var(--blue); }
+.cl-sec__head strong { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.cl-sec__head small  { display: block; margin-top: 1px; font-size: var(--fs-sm); color: var(--muted-3); }
+.cl-sec__spacer { flex: 1; }
+.cl-sec__body { padding: 0 var(--s-5) var(--s-5); }
+.cl-sec__body--flush { padding: 0; }
+
+/* the step counter beside "Save as Draft" */
+.cl-step {
+  padding: 5px 12px; border-radius: var(--r-pill);
+  background: var(--green-tint); color: var(--green-dark);
+  font-size: var(--fs-sm); font-weight: 600;
+}
+
+/* sticky-looking footer bar under a long form */
+.cl-form-foot {
+  display: flex; align-items: center; gap: var(--s-3);
+  margin-top: var(--s-5); padding: var(--s-4) var(--s-5);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+.cl-form-foot p { flex: 1; font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- inline note block ----------
+   Permanent page content that looks like an alert but is not one.
+   `.alert--success` cannot be used here: js/core/app.js removes every element
+   with that class six seconds after load, which is right for a flash message
+   and wrong for a form's own copy. */
+.cl-note { padding: 12px 14px; border-radius: var(--r-md); font-size: var(--fs-sm); }
+.cl-note strong { display: block; }
+.cl-note p { margin-top: 3px; }
+.cl-note--green { background: var(--green-tint); color: var(--green-dark); }
+.cl-note--amber { background: var(--amber-tint); color: var(--amber-dark); }
+.cl-note--red   { background: var(--red-tint);   color: var(--red-dark); }
+.cl-note--blue  { background: var(--blue-tint);  color: var(--blue); }
+.cl-note .cl-check { color: inherit; }
+
+/* ---------- checkbox / radio groups ---------- */
+.cl-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.cl-check { display: flex; align-items: center; gap: 9px; font-size: var(--fs-sm); color: var(--ink-2); }
+.cl-check input { width: 16px; height: 16px; accent-color: var(--green); }
+
+.cl-radios { display: flex; flex-wrap: wrap; gap: var(--s-4); }
+.cl-radios label { display: flex; align-items: center; gap: 7px; font-size: var(--fs-sm); color: var(--ink-2); }
+.cl-radios input { accent-color: var(--green); }
+
+/* pick-one pills - "Did you feel safe?", visibility, skills */
+.cl-pills { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.cl-pill { position: relative; }
+.cl-pill input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.cl-pill span {
+  display: block; padding: 8px 16px; border: 1px solid var(--field-border);
+  border-radius: var(--r-pill); background: var(--surface);
+  font-size: var(--fs-sm); color: var(--muted-2); cursor: pointer;
+}
+.cl-pill input:checked + span {
+  border-color: var(--green); background: var(--green-tint); color: var(--green-dark); font-weight: 600;
+}
+
+/* ---------- star rating ---------- */
+.cl-rate { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; }
+.cl-rate input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cl-rate label { font-size: 19px; line-height: 1; color: var(--line); cursor: pointer; }
+/* row-reverse means "earlier in the DOM" is to the right, so a checked star
+   lights itself and every sibling drawn after it - the ones to its left. */
+.cl-rate input:checked ~ label,
+.cl-rate label:hover,
+.cl-rate label:hover ~ label { color: var(--amber); }
+.cl-rate-row {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: 11px 0; border-bottom: 1px solid var(--line-2);
+}
+.cl-rate-row:last-child { border-bottom: 0; }
+.cl-rate-row > span:first-child { flex: 1; font-size: var(--fs-sm); color: var(--ink-2); }
+.cl-stars { font-size: 17px; color: var(--amber); letter-spacing: 2px; }
+.cl-stars small { margin-left: 8px; font-size: var(--fs-sm); color: var(--muted); letter-spacing: 0; }
+
+/* ---------- organiser campaign table ---------- */
+.cl-table { width: 100%; border-collapse: collapse; }
+.cl-table th {
+  text-align: left; padding: 12px 14px; background: var(--surface-3);
+  font-size: var(--fs-xs); font-weight: 700; color: var(--muted-2);
+  text-transform: uppercase; letter-spacing: .03em; white-space: nowrap;
+}
+.cl-table td { padding: var(--s-4) 14px; border-bottom: 1px solid var(--line-2); vertical-align: top; font-size: var(--fs-sm); }
+.cl-table tr:last-child td { border-bottom: 0; }
+
+.cl-cell { display: flex; gap: var(--s-3); }
+.cl-cell__thumb {
+  width: 54px; height: 44px; flex: none; border-radius: var(--r-sm);
+  background: var(--brand-tint); display: grid; place-items: center;
+}
+.cl-cell__thumb .icon { width: 18px; height: 18px; color: var(--brand); }
+.cl-cell__body { min-width: 0; }
+.cl-cell__body h3 {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+  font-size: var(--fs-base); font-weight: 700; color: var(--ink);
+}
+.cl-cell__body p { margin-top: 3px; font-size: var(--fs-sm); color: var(--muted); }
+.cl-cell__by { display: block; margin-top: 4px; font-size: var(--fs-xs); color: var(--muted-3); }
+.cl-tag {
+  padding: 3px 8px; border-radius: var(--r-sm); background: var(--surface-3);
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--muted-2);
+}
+.cl-tag--green { background: var(--green-tint); color: var(--green-dark); }
+.cl-tag--red   { background: var(--red-tint);   color: var(--red-dark); }
+
+/* two stacked figures with an icon, used in the Volunteers and Reach columns */
+.cl-figures { display: grid; gap: 9px; }
+.cl-figures div { display: flex; align-items: center; gap: 8px; }
+.cl-figures .icon { width: 15px; height: 15px; flex: none; color: var(--muted-3); }
+.cl-figures strong { display: block; font-size: var(--fs-base); font-weight: 700; color: var(--ink); line-height: 1.1; }
+.cl-figures small  { font-size: var(--fs-xs); color: var(--muted-3); }
+
+.cl-when { display: grid; gap: 6px; }
+.cl-when span { display: flex; align-items: center; gap: 7px; color: var(--ink-2); white-space: nowrap; }
+.cl-when .icon { width: 14px; height: 14px; color: var(--muted-3); }
+
+/* ---------- attendance table ---------- */
+.cl-vol { display: flex; align-items: center; gap: 10px; }
+.cl-avatar {
+  width: 30px; height: 30px; flex: none; display: grid; place-items: center;
+  border-radius: var(--r-pill); background: var(--green-tint);
+  font-size: var(--fs-xs); font-weight: 700; color: var(--green-dark);
+}
+.cl-vol strong { display: block; font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
+.cl-vol small  { font-size: var(--fs-xs); color: var(--muted-3); }
+.cl-checkin  { font-size: var(--fs-sm); color: var(--green-dark); font-weight: 600; }
+.cl-checkin small { display: block; font-weight: 400; color: var(--muted-3); }
+.cl-checkin--off { color: var(--muted-3); font-weight: 400; }
+.cl-select-bar {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-4) var(--s-5); border-top: 1px solid var(--line-2);
+}
+.cl-select-bar__text { flex: 1; }
+.cl-select-bar strong { display: block; font-size: var(--fs-sm); color: var(--ink); }
+.cl-select-bar small  { font-size: var(--fs-xs); color: var(--muted-3); }
+
+/* ---------- "Add Work Area" on the attendance screen ---------- */
+.cl-area-form {
+  display: flex; align-items: flex-start; gap: var(--s-3);
+  margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--line-2);
+}
+.cl-area-form .field { flex: 1; max-width: 380px; }
+.cl-area-form .btn   { flex: none; }
+
+/* ---------- "Record collected waste" on the organiser's detail screen ---------- */
+.cl-waste-form {
+  display: flex; align-items: flex-start; gap: var(--s-2);
+  margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--line-2);
+}
+.cl-waste-form .field { flex: 1; margin: 0; }
+.cl-waste-form .field:last-of-type { flex: 0 0 96px; }
+.cl-waste-form .btn   { flex: none; }
+
+/* ---------- group chat panel on the organiser's detail screen ---------- */
+.cl-chat { display: grid; gap: var(--s-4); }
+.cl-chat__msg { font-size: var(--fs-sm); }
+.cl-chat__top { display: flex; align-items: baseline; gap: var(--s-3); }
+.cl-chat__top strong { flex: 1; font-size: var(--fs-sm); color: var(--ink); }
+.cl-chat__top small  { font-size: var(--fs-xs); color: var(--muted-3); }
+.cl-chat__msg p { margin-top: 3px; color: var(--ink-2); }
+.cl-chat__compose { display: flex; gap: var(--s-2); margin-top: var(--s-2); }
+.cl-chat__compose input {
+  flex: 1; padding: 10px 12px; border: 1px solid var(--field-border);
+  border-radius: var(--r-md); background: var(--field-bg); font-size: var(--fs-sm);
+}
+
+
+/* ---------- what-to-bring / guideline lists ---------- */
+.cl-bullets { display: grid; gap: 9px; list-style: none; }
+.cl-bullets li { position: relative; padding-left: 16px; font-size: var(--fs-sm); color: var(--ink-2); }
+.cl-bullets li::before {
+  content: ''; position: absolute; left: 2px; top: 7px;
+  width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--amber);
+}
+.cl-ticks { display: grid; gap: 9px; list-style: none; }
+.cl-ticks li { position: relative; padding-left: 22px; font-size: var(--fs-sm); color: var(--ink-2); }
+.cl-ticks li::before {
+  content: '✓'; position: absolute; left: 0; top: -1px;
+  color: var(--green-dark); font-weight: 700;
+}
+
+/* uploaded-photo placeholders on the create form */
+.cl-thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+.cl-thumbs span {
+  width: 48px; height: 40px; display: grid; place-items: center;
+  border-radius: var(--r-sm); background: var(--surface-3);
+  font-size: 10px; font-weight: 700; color: var(--muted-3);
+}
+.cl-thumbs label {
+  display: grid; place-items: center; padding: 0 var(--s-4); height: 40px;
+  border: 1px dashed var(--field-border); border-radius: var(--r-sm);
+  font-size: var(--fs-sm); color: var(--muted-2); cursor: pointer;
+}
+.cl-thumbs label input { display: none; }
+
+/* ---------- appreciation certificate ----------
+   Reuses .cert* from pages/blood.css; only the accents change, because this
+   module's certificate is the same sheet in green with a third fact column. */
+.cert--cleanup .cert__band { background: var(--green); border-bottom: 0; }
+.cert--cleanup .cert__brand { color: #fff; }
+.cert--cleanup .cert__brand span { color: var(--brand-tint); }
+.cert--cleanup .cert__tagline { color: #d9f2e2; }
+.cert--cleanup .cert__seal { background: #fff; color: var(--green-dark); }
+.cert--cleanup .cert__title { color: var(--ink); }
+.cert--cleanup .cert__camp { color: var(--green-dark); }
+/* blood.css centres the fact strip with `margin: … auto`, which shrink-wraps it
+   inside the column flex body. This module's strip is three equal columns
+   across the full sheet, so stretch it and drop the auto side margins. */
+.cert--cleanup .cert__facts {
+  align-self: stretch; margin-left: 0; margin-right: 0;
+  gap: 0; padding: var(--s-4) 0; background: var(--surface-2); border-radius: var(--r-lg);
+}
+.cert--cleanup .cert__facts small { white-space: nowrap; }
+.cert--cleanup .cert__facts > div { flex: 1; justify-content: center; border-right: 1px solid var(--line); }
+.cert--cleanup .cert__facts > div:last-child { border-right: 0; }
+.cert--cleanup .cert__facts .icon { color: var(--green-dark); }
+
+/* ---------- guest padding -----------------------------------
+   Signed in, .app-main supplies the padding. The guest shell has
+   none of its own - the landing page wants full-bleed bands - so
+   a public module page has to pad itself. `/cleanup` and
+   `/cleanup/{id}` are the two open to guests. Same fix
+   pages/reuse.css makes with .reuse-page. */
+.guest-body .cl-page {
+  padding: var(--s-6) clamp(var(--s-4), 6vw, var(--page-pad));
+}
