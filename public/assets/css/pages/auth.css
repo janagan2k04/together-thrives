@@ -1,0 +1,463 @@
+/* =========================================================
+   Auth pages - sign in, registration, password reset.
+   Split shell: brand aside on the left, form panel on the right.
+   Tokens only - no raw hex.
+   ========================================================= */
+
+.auth-split {
+  display: grid;
+  grid-template-columns: 43% 1fr;
+  min-height: 100vh;
+}
+
+/* ---------- left brand panel ---------- */
+.auth-aside {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--s-10) var(--s-12);
+  background: var(--surface-3);
+}
+.auth-aside__logo { font-size: 25px; font-weight: 700; color: var(--ink); }
+.auth-aside__logo span { color: var(--brand); }
+
+.auth-aside__head { margin-top: var(--s-12); }
+.auth-aside__title {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+}
+.auth-aside__title em   { display: block; font-style: normal; color: var(--brand); }
+.auth-aside__title span { display: block; }
+.auth-aside__lede {
+  max-width: 480px;
+  margin-top: var(--s-4);
+  color: var(--muted);
+}
+
+/* benefit list, pinned to the bottom of the panel */
+.auth-benefits { margin-top: auto; display: grid; gap: var(--s-6); }
+.auth-benefit { display: flex; gap: var(--s-4); align-items: flex-start; }
+.auth-benefit__icon {
+  flex: none;
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: var(--r-pill);
+}
+.auth-benefit__icon .icon { width: 19px; height: 19px; }
+.auth-benefit__icon--green { background: var(--green-tint);  color: var(--green-dark); }
+.auth-benefit__icon--red   { background: var(--red-tint);    color: var(--red); }
+.auth-benefit__icon--amber { background: var(--amber-tint);  color: var(--amber); }
+.auth-benefit__icon--blue  { background: var(--blue-tint);   color: var(--blue); }
+.auth-benefit__icon--brand { background: var(--brand-tint);  color: var(--brand); }
+.auth-benefit strong { display: block; font-size: var(--fs-base); color: var(--ink); }
+.auth-benefit p { margin-top: 2px; font-size: var(--fs-sm); color: var(--muted); max-width: 380px; }
+
+/* ---------- right form panel ---------- */
+.auth-panel {
+  display: grid;
+  place-items: center;
+  padding: var(--s-10) var(--s-12);
+  background: var(--surface);
+}
+.auth-panel--tinted { background: var(--surface-2); }
+
+.auth-form {
+  width: 100%;
+  max-width: 560px;
+  padding: var(--s-10);
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+}
+.auth-form--wide { max-width: 700px; }
+
+.auth-form__title { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -.01em; }
+.auth-form__sub { margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); }
+.auth-form__sub a { color: var(--brand); font-weight: 600; }
+.auth-form__sub a:hover { text-decoration: underline; }
+
+/* section heading inside long registration forms */
+.auth-section {
+  display: flex; align-items: center; gap: var(--s-3);
+  margin: var(--s-8) 0 var(--s-5);
+}
+.auth-section__icon {
+  flex: none; width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: var(--r-md);
+  background: var(--brand-tint); color: var(--brand);
+}
+.auth-section__icon .icon { width: 18px; height: 18px; }
+.auth-section strong { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.auth-section p { font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- fields (sentence-case labels, not the uppercase app style) ---------- */
+.auth-form .field { margin-bottom: var(--s-5); }
+.auth-form .field__label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: var(--s-2);
+}
+.field__label .req { color: var(--red); margin-left: 2px; }
+
+/* input with a leading icon and optional trailing button */
+.control { position: relative; display: flex; align-items: center; }
+.control__icon {
+  position: absolute; left: 14px;
+  width: 18px; height: 18px;
+  color: var(--placeholder);
+  pointer-events: none;
+}
+.control__input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+}
+.control__input::placeholder { color: var(--placeholder); }
+.control__icon ~ .control__input { padding-left: 44px; }
+/* No focus highlight at all - the group asked for it off on every field, on
+   every page. The invalid state below is untouched: a field the validator has
+   marked should still shout, focused or not. */
+.control__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+/* selects use the same shell, with a chevron drawn on the right */
+select.control__input {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+select.control__input:invalid { color: var(--placeholder); }
+.control__chevron {
+  position: absolute; right: 14px;
+  width: 18px; height: 18px;
+  color: var(--muted-2);
+  pointer-events: none;
+}
+
+textarea.control__input {
+  height: auto;
+  min-height: 110px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+.control__count {
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
+  color: var(--muted-3);
+}
+
+.control__toggle {
+  position: absolute; right: 12px;
+  display: grid; place-items: center;
+  padding: 4px; border: 0; background: none;
+  color: var(--placeholder); cursor: pointer;
+}
+.control__toggle:hover { color: var(--muted); }
+.control__toggle .icon { width: 18px; height: 18px; }
+.control__input[type="password"], .control__input[data-password] { padding-right: 44px; }
+
+.field--invalid .control__input { border-color: var(--red); }
+.field--invalid .control__input:focus { box-shadow: none; }
+
+/* two-up field grid */
+.auth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--s-5); }
+.auth-grid--full { grid-column: 1 / -1; }
+/* the dropzone needs more room than the accepted-documents panel */
+.auth-grid--doc { grid-template-columns: 3fr 2fr; align-items: start; }
+
+/* phone number: country prefix + number */
+.control-split { display: grid; grid-template-columns: 118px 1fr; gap: var(--s-3); }
+
+/* ---------- checkbox ---------- */
+.check { display: inline-flex; align-items: center; gap: var(--s-3); cursor: pointer; }
+.check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.check__box {
+  flex: none; width: 20px; height: 20px;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--field-border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  transition: background .12s, border-color .12s;
+}
+.check__box .icon { width: 14px; height: 14px; color: #fff; opacity: 0; }
+.check input:checked + .check__box { background: var(--brand); border-color: var(--brand); }
+.check input:checked + .check__box .icon { opacity: 1; }
+.check input:focus-visible + .check__box { box-shadow: none; }
+.check__text { font-size: var(--fs-sm); color: var(--ink-2); }
+.check__text a { color: var(--brand); font-weight: 600; }
+.check__text a:hover { text-decoration: underline; }
+
+/* ---------- forgot-password row ---------- */
+.auth-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-4); margin-bottom: var(--s-6);
+}
+/* Nothing sits to the left of Forgot password?, so keep it on the right. */
+.auth-row--end { justify-content: flex-end; }
+.auth-link { font-size: var(--fs-sm); font-weight: 600; color: var(--brand); }
+.auth-link:hover { text-decoration: underline; }
+
+/* ---------- submit + footnote ---------- */
+.btn--auth {
+  width: 100%; height: 52px;
+  background: var(--brand); color: #fff;
+  border-radius: var(--r-md);
+  font-size: var(--fs-base); font-weight: 600;
+}
+.btn--auth:hover { background: var(--brand-dark); }
+.btn--auth .icon { width: 18px; height: 18px; }
+
+.auth-secure {
+  display: flex; align-items: center; justify-content: center; gap: var(--s-2);
+  margin-top: var(--s-5);
+  font-size: var(--fs-sm); color: var(--muted);
+}
+.auth-secure .icon { width: 16px; height: 16px; color: var(--green-dark); }
+
+/* ---------- role radio cards (registration) ---------- */
+.role-radio { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+.role-radio__opt { cursor: pointer; }
+.role-radio__opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+.role-radio__box {
+  display: grid; justify-items: center; gap: var(--s-2);
+  padding: var(--s-4) var(--s-3);
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  text-align: center;
+  transition: border-color .12s, background .12s;
+}
+.role-radio__dot {
+  width: 16px; height: 16px; border-radius: var(--r-pill);
+  border: 1.5px solid var(--field-border);
+}
+.role-radio__box .icon { width: 22px; height: 22px; color: var(--muted-3); }
+.role-radio__box span { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
+.role-radio__opt input:checked + .role-radio__box {
+  border-color: var(--brand); background: var(--brand-tint);
+}
+.role-radio__opt input:checked + .role-radio__box .role-radio__dot {
+  border-color: var(--brand); border-width: 5px;
+}
+.role-radio__opt input:checked + .role-radio__box .icon { color: var(--brand); }
+.role-radio__opt input:focus-visible + .role-radio__box { box-shadow: none; }
+
+/* the chooser doubles as navigation: the current role is marked, the others link away */
+.role-radio__box.is-active { border-color: var(--brand); background: var(--brand-tint); }
+.role-radio__box.is-active .role-radio__dot { border-color: var(--brand); border-width: 5px; }
+.role-radio__box.is-active .icon { color: var(--brand); }
+a.role-radio__opt:hover .role-radio__box { border-color: var(--brand); }
+
+/* filename echoed back after the user picks a document */
+.dropzone__chosen {
+  display: block; margin-top: var(--s-2);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--green-dark);
+}
+
+/* ---------- file dropzone ---------- */
+.dropzone {
+  display: flex; align-items: center; justify-content: center; gap: var(--s-4);
+  padding: var(--s-8) var(--s-5);
+  border: 1.5px dashed var(--brand);
+  border-radius: var(--r-lg);
+  background: var(--brand-tint);
+  text-align: center;
+  cursor: pointer;
+}
+.dropzone:hover { background: var(--surface); }
+.dropzone .icon { width: 30px; height: 30px; color: var(--brand); }
+.dropzone input[type="file"] { display: none; }
+.dropzone__text { font-size: var(--fs-sm); color: var(--ink-2); }
+.dropzone__text b { color: var(--brand); }
+.dropzone__hint { display: block; font-size: var(--fs-sm); color: var(--muted-3); }
+.dropzone__note {
+  display: flex; align-items: center; gap: var(--s-2);
+  margin-bottom: var(--s-3);
+  font-size: var(--fs-sm); color: var(--muted);
+}
+.dropzone__note .icon { width: 16px; height: 16px; color: var(--blue); }
+
+.doc-accepted {
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  font-size: var(--fs-sm);
+}
+.doc-accepted strong { display: block; margin-bottom: var(--s-2); color: var(--ink-2); font-weight: 600; }
+.doc-accepted li { display: flex; align-items: center; gap: var(--s-2); color: var(--muted); list-style: none; }
+.doc-accepted .icon { width: 15px; height: 15px; color: var(--green-dark); }
+
+/* ---------- centred card pages (forgot password, submitted) ---------- */
+.auth-centre {
+  min-height: 100vh;
+  display: grid; place-items: center;
+  padding: var(--s-10) var(--s-4);
+  background: var(--surface-2);
+}
+.auth-centre__inner { width: 100%; max-width: 520px; }
+.auth-centre__logo {
+  display: block; margin-bottom: var(--s-6);
+  font-size: 25px; font-weight: 700; color: var(--ink); text-align: center;
+}
+.auth-centre__logo span { color: var(--brand); }
+.auth-centre--wide .auth-centre__inner { max-width: 1080px; }
+
+.auth-note { margin: var(--s-3) 0 var(--s-6); color: var(--muted); text-align: center; }
+
+.auth-or {
+  display: flex; align-items: center; gap: var(--s-4);
+  margin: var(--s-5) 0;
+  font-size: var(--fs-sm); color: var(--muted-3);
+}
+.auth-or::before, .auth-or::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+
+.btn--wide { width: 100%; height: 48px; }
+
+/* success screen */
+.auth-success { text-align: center; }
+.auth-success__mark {
+  width: 84px; height: 84px; margin: 0 auto var(--s-6);
+  display: grid; place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--green-tint); color: var(--green-dark);
+}
+.auth-success__mark .icon { width: 42px; height: 42px; stroke-width: 1.5; }
+.auth-success h1 { font-size: var(--fs-3xl); letter-spacing: -.02em; }
+
+.next-steps { margin-top: var(--s-8); text-align: left; }
+.next-steps > strong { display: block; margin-bottom: var(--s-4); font-size: var(--fs-lg); color: var(--ink); }
+.next-step {
+  padding: var(--s-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+}
+.next-step__icon {
+  width: 38px; height: 38px; margin-bottom: var(--s-3);
+  display: grid; place-items: center;
+  border-radius: var(--r-md);
+}
+.next-step__icon .icon { width: 19px; height: 19px; }
+.next-step__icon--blue  { background: var(--blue-tint);  color: var(--blue); }
+.next-step__icon--amber { background: var(--amber-tint); color: var(--amber); }
+.next-step strong { display: block; font-size: var(--fs-base); color: var(--ink); }
+.next-step p { margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- token cards: forgot password, reset password, verify email ---------- */
+.auth-card {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--s-8);
+}
+.auth-card__label { font-size: var(--fs-sm); font-weight: 700; color: var(--ink); }
+.auth-card__head  { margin: var(--s-6) 0 var(--s-8); text-align: center; }
+.auth-card__head h1 {
+  font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -.01em;
+}
+.auth-card__head p {
+  margin-top: var(--s-2); font-size: var(--fs-sm); color: var(--muted); line-height: 1.5;
+}
+
+/* "OR" rule between the submit button and the way back */
+.or-split { display: flex; align-items: center; gap: var(--s-3); margin: var(--s-4) 0; }
+.or-split::before,
+.or-split::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.or-split span { font-size: var(--fs-xs); font-weight: 600; color: var(--muted-2); }
+
+/* Amber so it reads as scaffolding, not as part of the product. Only rendered
+   when APP_DEBUG is true - see PasswordController::sendLink(). */
+.dev-link {
+  margin-top: var(--s-6); padding: var(--s-4);
+  background: var(--amber-tint); border-radius: var(--r-md);
+  font-size: var(--fs-sm); color: var(--amber-dark);
+}
+.dev-link strong { display: block; margin-bottom: var(--s-2); }
+.dev-link a { color: var(--amber-dark); font-weight: 600; word-break: break-all; }
+
+.auth-success__mark--warn { background: var(--amber-tint); color: var(--amber-dark); }
+
+/* ---------- demo account picker (sign-in aside) ----------
+   Sits where .auth-benefits sits on the registration screens - pinned to the
+   foot of the grey brand panel - so the two never appear together. White rows
+   on --surface-3 give the separation without inventing a colour. Rendered only
+   when DEMO_ACCOUNTS is on; see AuthController::showLogin(). */
+.demo-accounts { margin-top: auto; padding-top: var(--s-8); }
+.demo-accounts__head { margin-bottom: var(--s-3); }
+.demo-accounts__head strong { font-size: var(--fs-base); color: var(--ink); }
+.demo-accounts__head span { margin-left: var(--s-2); font-size: var(--fs-sm); color: var(--muted); }
+.demo-accounts__head em { font-style: normal; font-weight: 600; color: var(--ink-2); }
+
+.demo-account {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  margin-top: var(--s-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.demo-account__who {
+  grid-column: 1; grid-row: 1;
+  display: flex; align-items: center; gap: var(--s-2); min-width: 0;
+}
+.demo-account__who strong {
+  font-size: var(--fs-sm); color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.demo-account__creds {
+  grid-column: 1; grid-row: 2;
+  display: flex; align-items: center; gap: var(--s-2);
+  font-size: var(--fs-xs); color: var(--muted-2);
+  overflow: hidden;
+}
+.demo-account__creds code { font-size: var(--fs-xs); white-space: nowrap; }
+.demo-account__use {
+  grid-column: 2; grid-row: 1 / span 2;
+  padding: var(--s-1) var(--s-4); font-size: var(--fs-xs);
+}
+
+/* Six rows plus the heading can outgrow a short viewport - let the panel scroll
+   rather than clipping the last account off the bottom. */
+@media (max-height: 800px) {
+  .auth-aside { overflow-y: auto; }
+  .auth-aside__head { margin-top: var(--s-8); }
+  .auth-aside__title { font-size: 32px; }
+}
+@media (max-width: 560px) {
+  .demo-account__creds { flex-wrap: wrap; }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .auth-aside  { padding: var(--s-8); }
+  .auth-panel  { padding: var(--s-8) var(--s-6); }
+}
+@media (max-width: 900px) {
+  .auth-split { grid-template-columns: 1fr; }
+  .auth-aside { position: static; height: auto; }
+  .auth-aside__head { margin-top: var(--s-8); }
+  .auth-benefits { display: none; }
+  .auth-aside__title { font-size: var(--fs-3xl); }
+  .auth-form { padding: var(--s-6); box-shadow: none; }
+  .auth-grid, .auth-grid--doc, .role-radio { grid-template-columns: 1fr; }
+  .dropzone { flex-direction: column; }
+}
