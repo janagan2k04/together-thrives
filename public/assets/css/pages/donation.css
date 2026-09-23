@@ -1,0 +1,439 @@
+/* ============================================================
+   Item & Fund Donation - Member 2
+   Tokens only, no new colours. Shared building blocks (.panel,
+   .stat, .kv, .split, .crumbs, .table, .field) come from
+   pages/shared.css and components/ui.css; everything here is
+   the module's own and is prefixed .don- so it cannot leak.
+   The module's accent is amber, which is the colour the Figma
+   gives the gift icon, Create Donation Request, Reserve and
+   Donate Now.
+   ============================================================ */
+
+/* ---------- accent button ------------------------------------
+   .btn--primary is green and .btn--brand purple; the donation
+   frames use an amber call to action. Same token set. */
+.btn--accent { background: var(--amber); color: #fff; }
+.btn--accent:hover { background: var(--amber-dark); }
+
+/* ---------- page header -------------------------------------- */
+.don-head { display: flex; align-items: flex-start; gap: var(--s-4); margin-bottom: var(--s-5); }
+.don-head__icon {
+  display: grid; place-items: center; width: 46px; height: 46px; flex: none;
+  border-radius: var(--r-lg); background: var(--amber-tint); color: var(--amber-dark);
+}
+.don-head__icon .icon { width: 24px; height: 24px; }
+.don-head__text { flex: 1; min-width: 0; }
+.don-head__text h1 { font-size: var(--fs-2xl); font-weight: 700; color: var(--ink); line-height: 1.2; }
+.don-head__text p  { margin-top: 4px; font-size: var(--fs-base); color: var(--muted); }
+.don-head__actions { display: flex; align-items: center; gap: var(--s-2); flex: none; }
+
+/* ---------- "Your Impact" strip ------------------------------ */
+.don-impact {
+  padding: var(--s-4) var(--s-5); margin-bottom: var(--s-5);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.don-impact__title { font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+.don-impact__row { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-3); }
+.don-impact__tile {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px var(--s-4); border-radius: var(--r-md); background: var(--surface-2);
+}
+.don-impact__tile .icon { width: 20px; height: 20px; flex: none; }
+.don-impact__tile strong { display: block; font-size: var(--fs-lg); font-weight: 700; color: var(--ink); line-height: 1.2; }
+.don-impact__tile small  { font-size: var(--fs-xs); color: var(--muted-3); }
+.don-impact__tile--green { background: var(--green-tint); }
+.don-impact__tile--green .icon { color: var(--green-dark); }
+.don-impact__tile--brand { background: var(--brand-tint); }
+.don-impact__tile--brand .icon { color: var(--brand); }
+.don-impact__tile--amber { background: var(--amber-tint); }
+.don-impact__tile--amber .icon { color: var(--amber-dark); }
+
+/* ---------- tabs --------------------------------------------- */
+.don-tabs {
+  display: flex; gap: var(--s-6); margin-bottom: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+.don-tabs a {
+  padding-bottom: 10px; font-size: var(--fs-base); font-weight: 600; color: var(--muted);
+  border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.don-tabs a:hover { color: var(--ink-2); }
+.don-tabs a.is-active { color: var(--amber-dark); border-bottom-color: var(--amber); }
+
+/* ---------- filter bar --------------------------------------- */
+.don-filters {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4); margin-bottom: var(--s-4);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.don-filters select, .don-filters input[type="search"] {
+  padding: 8px 12px; border: 1px solid var(--field-border); border-radius: var(--r-md);
+  background: var(--field-bg); font: inherit; font-size: var(--fs-sm); color: var(--ink-2);
+}
+.don-filters__spacer { flex: 1; }
+
+/* ---------- browse cards ------------------------------------- */
+.don-list { display: grid; gap: var(--s-4); }
+.don-card {
+  display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--s-4);
+  padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--surface); transition: box-shadow .15s, border-color .15s;
+}
+.don-card:hover { border-color: #d9dee7; box-shadow: var(--shadow-md); }
+.don-card__thumb {
+  position: relative; height: 148px; border-radius: var(--r-md);
+  background: var(--surface-3); overflow: hidden;
+}
+.don-card__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.don-card__tag {
+  position: absolute; top: 10px; left: 10px;
+  padding: 4px 9px; border-radius: var(--r-sm);
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #fff;
+}
+.don-card__tag--items { background: var(--green); }
+.don-card__tag--funds { background: var(--brand); }
+.don-card__body { min-width: 0; }
+.don-card__body h3 { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.don-card__by {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
+  margin-top: 5px; font-size: var(--fs-sm); color: var(--muted);
+}
+.don-card__by .icon { width: 14px; height: 14px; color: var(--green); }
+.don-card__where {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: 4px; font-size: var(--fs-sm); color: var(--muted-3);
+}
+.don-card__where .icon { width: 14px; height: 14px; }
+.don-card__text { margin-top: var(--s-3); font-size: var(--fs-base); color: var(--ink-2); }
+/* status and closing date, where the progress column used to be */
+.don-card__meta { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-3); }
+.don-card__ends {
+  display: flex; align-items: center; gap: 5px;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--red);
+}
+.don-card__ends .icon { width: 14px; height: 14px; }
+
+/* item chips under a browse card */
+.don-chips { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.don-chip {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2); font-size: var(--fs-sm); color: var(--ink-2);
+}
+.don-chip .icon { width: 15px; height: 15px; color: var(--muted-3); }
+.don-chip strong { display: block; font-weight: 600; }
+.don-chip small  { display: block; font-size: var(--fs-xs); color: var(--muted-3); }
+.don-chip--more { justify-content: center; color: var(--muted-3); }
+
+/* category pills on the org list */
+.don-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.don-cat {
+  padding: 4px 9px; border-radius: var(--r-sm);
+  background: var(--green-tint); font-size: var(--fs-xs); font-weight: 600; color: var(--green-dark);
+}
+.don-cat--more { background: var(--surface-3); color: var(--muted); }
+
+/* ---------- status badge ------------------------------------- */
+.don-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: var(--r-pill);
+  font-size: var(--fs-xs); font-weight: 700; white-space: nowrap;
+}
+.don-status--green   { background: var(--green-tint-2);       color: var(--green-dark); }
+.don-status--amber   { background: var(--status-pending-bg);  color: var(--status-pending-fg); }
+.don-status--blue    { background: var(--blue-tint);          color: var(--blue); }
+.don-status--red     { background: var(--red-tint);           color: var(--red-dark); }
+.don-status--brand   { background: var(--brand-tint);         color: var(--brand); }
+.don-status--neutral { background: var(--surface-3);          color: var(--muted); }
+
+/* ---------- progress bar ------------------------------------- */
+.don-progress { height: 8px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.don-progress__bar { height: 100%; border-radius: var(--r-pill); background: var(--green); }
+.don-progress__bar--amber { background: var(--amber); }
+
+/* ---------- numbered form sections --------------------------- */
+.don-sec {
+  margin-bottom: var(--s-4);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.don-sec__head {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--line-2);
+}
+.don-sec__num { font-size: var(--fs-lg); font-weight: 700; color: var(--muted-3); }
+.don-sec__head strong { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); }
+.don-sec__head small  { margin-left: auto; font-size: var(--fs-sm); color: var(--muted-3); }
+.don-sec__body { padding: var(--s-5); }
+.don-sec__body .field:last-child { margin-bottom: 0; }
+
+/* ---------- request-type toggle ------------------------------ */
+.don-toggle { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.don-toggle a, .don-toggle span, .don-toggle label {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border: 1px solid var(--field-border); border-radius: var(--r-md);
+  background: var(--surface); font-size: var(--fs-base); font-weight: 600; color: var(--muted);
+}
+.don-toggle a:hover, .don-toggle label:hover { background: var(--surface-2); }
+.don-toggle label { cursor: pointer; }
+/* The radio itself is the state, not the decoration - .is-active draws it. */
+.don-toggle label input { position: absolute; opacity: 0; width: 0; height: 0; }
+/* With JavaScript off the switch cannot hide a panel, so show the radio. */
+.don-toggle label:focus-within { outline: 2px solid var(--brand); outline-offset: 2px; }
+.don-toggle .is-active {
+  background: var(--amber-tint); border-color: var(--amber); color: var(--amber-dark);
+}
+.don-toggle .icon { width: 17px; height: 17px; }
+
+/* ---------- editable item rows on the create form ------------ */
+.don-rows { width: 100%; border-collapse: collapse; }
+.don-rows th {
+  padding: 10px var(--s-3); border-bottom: 1px solid var(--line);
+  background: var(--surface-2); text-align: left;
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--muted);
+}
+.don-rows td { padding: 10px var(--s-3); border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+.don-rows tr:last-child td { border-bottom: 0; }
+.don-rows select, .don-rows input {
+  width: 100%; padding: 9px 11px;
+  border: 1px solid var(--field-border); border-radius: var(--r-md);
+  background: var(--field-bg); font: inherit; font-size: var(--fs-base); color: var(--ink);
+}
+.don-rows__del {
+  display: grid; place-items: center; width: 30px; height: 30px;
+  border: 0; border-radius: var(--r-sm); background: var(--red-tint); color: var(--red); cursor: pointer;
+}
+.don-rows__del .icon { width: 15px; height: 15px; }
+.don-rows__del:disabled { opacity: .55; cursor: not-allowed; }
+.don-add {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: var(--s-4);
+  padding: 9px 16px; border: 1px dashed var(--amber); border-radius: var(--r-md);
+  background: var(--amber-tint); font-size: var(--fs-sm); font-weight: 600; color: var(--amber-dark);
+}
+.don-add .icon { width: 15px; height: 15px; }
+
+/* ---------- "Items Needed" panel, community detail ----------- */
+.don-need { display: grid; gap: var(--s-3); }
+.don-need__row {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: var(--s-3);
+  align-items: center; padding: var(--s-3);
+  border-radius: var(--r-md); background: var(--surface-2);
+}
+.don-need__icon { display: grid; place-items: center; width: 34px; height: 34px;
+                  border-radius: var(--r-sm); background: var(--surface); color: var(--muted-2); }
+.don-need__icon .icon { width: 18px; height: 18px; }
+.don-need__row strong { display: block; font-size: var(--fs-base); font-weight: 600; color: var(--ink); }
+.don-need__row small  { display: block; font-size: var(--fs-xs); color: var(--muted-3); }
+.don-need__side { text-align: right; }
+.don-need__side em { display: block; margin-bottom: 6px; font-style: normal;
+                     font-size: var(--fs-xs); font-weight: 600; color: var(--green-dark); }
+
+/* ---------- amount pickers ----------------------------------- */
+.don-amounts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+.don-amounts button, .don-amounts a {
+  padding: 11px 8px; border: 1px solid var(--field-border); border-radius: var(--r-md);
+  background: var(--surface); font: inherit; font-size: var(--fs-sm); font-weight: 600;
+  color: var(--ink-2); text-align: center; cursor: pointer;
+}
+.don-amounts button:hover, .don-amounts a:hover { background: var(--surface-2); }
+.don-amounts .is-active { background: var(--amber-tint); border-color: var(--amber); color: var(--amber-dark); }
+
+/* payment-method tabs on checkout */
+.don-methods { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }
+.don-methods label {
+  padding: 10px 16px; border: 1px solid var(--field-border); border-radius: var(--r-md);
+  background: var(--surface); font-size: var(--fs-sm); font-weight: 600; color: var(--muted); cursor: pointer;
+}
+.don-methods input { position: absolute; opacity: 0; pointer-events: none; }
+.don-methods input:checked + span {
+  color: var(--green-dark);
+}
+.don-methods label:has(input:checked) {
+  background: var(--green-tint); border-color: var(--green); color: var(--green-dark);
+}
+
+/* ---------- checkbox row ------------------------------------- */
+.don-check { display: flex; align-items: flex-start; gap: 9px; font-size: var(--fs-sm); color: var(--ink-2); }
+.don-check input { margin-top: 2px; width: 15px; height: 15px; flex: none; accent-color: var(--green); }
+.don-check + .don-check { margin-top: var(--s-2); }
+
+/* ---------- donor rows --------------------------------------- */
+.don-donors { display: grid; gap: var(--s-3); }
+.don-donor { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; }
+.don-avatar {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 50%; background: var(--brand-tint);
+  font-size: var(--fs-xs); font-weight: 700; color: var(--brand);
+}
+.don-donor strong { display: block; font-size: var(--fs-base); font-weight: 600; color: var(--ink); }
+.don-donor small  { display: block; font-size: var(--fs-xs); color: var(--muted-3); }
+.don-donor__amt { text-align: right; }
+.don-donor__amt b { display: block; font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+
+/* ---------- "what happens next" list ------------------------- */
+.don-next { display: grid; gap: var(--s-4); }
+.don-next__row { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: var(--s-3); align-items: start; }
+.don-next__icon {
+  display: grid; place-items: center; width: 30px; height: 30px;
+  border-radius: var(--r-sm); background: var(--brand-tint); color: var(--brand);
+}
+.don-next__icon .icon { width: 16px; height: 16px; }
+.don-next strong { display: block; font-size: var(--fs-base); font-weight: 600; color: var(--ink); }
+.don-next small  { display: block; margin-top: 2px; font-size: var(--fs-sm); color: var(--muted); }
+
+/* numbered variant used by the receipt screen */
+.don-next__icon--num { background: var(--green-tint); color: var(--green-dark); font-size: var(--fs-sm); font-weight: 700; }
+
+/* ---------- ticked internal-notes list ----------------------- */
+.don-ticks { display: grid; gap: 9px; }
+.don-ticks li { display: flex; align-items: flex-start; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); }
+.don-ticks .icon { width: 15px; height: 15px; flex: none; color: var(--green); }
+.don-ticks .don-tick--pending .icon { color: var(--amber-dark); }
+
+/* ---------- stat tile with a coloured icon square ------------ */
+.don-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-4); margin-bottom: var(--s-5); }
+.don-stat {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.don-stat__icon { display: grid; place-items: center; width: 38px; height: 38px; flex: none;
+                  border-radius: var(--r-md); background: var(--surface-3); color: var(--muted-2); }
+.don-stat__icon .icon { width: 19px; height: 19px; }
+.don-stat strong { display: block; font-size: var(--fs-xl); font-weight: 700; color: var(--ink); line-height: 1.15; }
+.don-stat small  { display: block; font-size: var(--fs-sm); color: var(--muted); }
+.don-stat--amber .don-stat__icon { background: var(--amber-tint); color: var(--amber-dark); }
+.don-stat--green .don-stat__icon { background: var(--green-tint); color: var(--green-dark); }
+.don-stat--brand .don-stat__icon { background: var(--brand-tint); color: var(--brand); }
+.don-stat--blue  .don-stat__icon { background: var(--blue-tint);  color: var(--blue); }
+
+/* ---------- fund headline ------------------------------------ */
+.don-raised { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--s-3); }
+.don-raised b { font-size: var(--fs-3xl); font-weight: 700; color: var(--ink); line-height: 1.1; }
+.don-raised span { font-size: var(--fs-base); color: var(--muted); }
+
+/* the four small figures under it */
+.don-figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); margin-top: var(--s-4); }
+.don-figure { padding: var(--s-3) var(--s-4); border-radius: var(--r-md); background: var(--surface-2); }
+.don-figure dt { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em;
+                 text-transform: uppercase; color: var(--muted-3); }
+.don-figure dd { margin-top: 3px; font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+
+/* ---------- money rows (breakdown / receipt) ----------------- */
+.don-money { display: grid; gap: 0; }
+.don-money__row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  padding: 11px 0; border-bottom: 1px solid var(--line-2);
+  font-size: var(--fs-base); color: var(--ink-2);
+}
+.don-money__row:last-child { border-bottom: 0; }
+.don-money__row b { font-weight: 700; color: var(--ink); }
+.don-money__row--total { padding-top: var(--s-3); border-top: 1px solid var(--line); border-bottom: 0; }
+.don-money__row--total span { font-weight: 700; color: var(--ink); }
+.don-money__row .don-up   { color: var(--green-dark); font-weight: 700; }
+.don-money__row .don-down { color: var(--red); font-weight: 700; }
+.don-money__row .don-wait { color: var(--amber-dark); font-weight: 700; }
+
+/* ---------- payment success ---------------------------------- */
+.don-success { padding: var(--s-10) var(--s-6); text-align: center; }
+.don-success__tick {
+  display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto var(--s-4);
+  border-radius: 50%; background: var(--green-tint-2); color: var(--green-dark);
+}
+.don-success__tick .icon { width: 30px; height: 30px; }
+.don-success h1 { font-size: var(--fs-2xl); font-weight: 700; color: var(--ink); }
+.don-success p  { margin-top: 8px; font-size: var(--fs-sm); color: var(--muted); }
+.don-success__amt { margin-top: var(--s-4); font-size: var(--fs-3xl); font-weight: 700; color: var(--green-dark); }
+.don-success__when {
+  display: inline-block; margin-top: var(--s-3); padding: 6px 14px;
+  border-radius: var(--r-pill); background: var(--green-tint);
+  font-size: var(--fs-xs); font-weight: 600; color: var(--green-dark);
+}
+.don-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-5); }
+
+/* ---------- disaster-context photo --------------------------- */
+.don-photo {
+  position: relative; display: grid; place-items: center;
+  height: 210px; border-radius: var(--r-md); background: var(--surface-3);
+  font-size: var(--fs-sm); color: var(--muted-3);
+}
+.don-photo__tag {
+  position: absolute; left: var(--s-3); bottom: var(--s-3);
+  padding: 5px 11px; border-radius: var(--r-sm);
+  background: var(--green); font-size: var(--fs-xs); font-weight: 600; color: #fff;
+}
+
+/* ---------- requester card ----------------------------------- */
+.don-who { display: flex; align-items: center; gap: var(--s-3); }
+.don-who__pic {
+  display: grid; place-items: center; width: 46px; height: 46px; flex: none;
+  border-radius: 50%; background: var(--brand-tint);
+  font-size: var(--fs-base); font-weight: 700; color: var(--brand);
+}
+.don-who strong { display: block; font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+.don-who small  { display: block; font-size: var(--fs-sm); color: var(--muted); }
+.don-who__verified {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--green-dark);
+}
+.don-who__verified .icon { width: 13px; height: 13px; }
+.don-contact { display: grid; gap: 8px; margin-top: var(--s-4); }
+.don-contact div { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); }
+.don-contact .icon { width: 15px; height: 15px; color: var(--muted-3); }
+
+/* ---------- timeline strip ----------------------------------- */
+.don-dates { display: flex; align-items: center; gap: var(--s-4); }
+.don-dates > div { flex: 1; }
+.don-dates dt { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em;
+                text-transform: uppercase; color: var(--muted-3); }
+.don-dates dd { margin-top: 3px; font-size: var(--fs-base); font-weight: 700; color: var(--ink); }
+.don-dates dd.is-end { color: var(--red); }
+.don-dates__arrow { flex: none !important; color: var(--muted-3); }
+.don-dates__arrow .icon { width: 18px; height: 18px; }
+
+/* ---------- permanent inline note ----------------------------
+   NOT .alert--success: js/core/app.js removes every element with
+   that class six seconds after load, which is right for a flash
+   message and wrong for a form's own copy. */
+.don-note {
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--surface-2);
+  font-size: var(--fs-sm); color: var(--ink-2);
+}
+.don-note strong { display: block; margin-bottom: 3px; font-weight: 700; }
+.don-note p { margin: 0; }
+.don-note .icon { width: 15px; height: 15px; flex: none; vertical-align: -2px; margin-right: 6px; }
+.don-note--green { background: var(--green-tint); border-color: var(--green-tint-2); color: var(--green-dark); }
+.don-note--amber { background: var(--amber-tint); border-color: #f4dcc0; color: var(--amber-dark); }
+.don-note--red   { background: var(--red-tint);   border-color: #f3c9c9; color: var(--red-dark); }
+.don-note--blue  { background: var(--blue-tint);  border-color: #d8e0f4; color: var(--blue); }
+
+/* ---------- sticky form footer ------------------------------- */
+.don-form-foot {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-4) var(--s-5); margin-top: var(--s-5);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.don-form-foot p { flex: 1; margin: 0; font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- guest padding -----------------------------------
+   Signed in, .app-main supplies the padding. The guest shell has
+   none of its own - the landing page wants full-bleed bands - so
+   a module page rendered for a guest has to pad itself. Same fix
+   pages/reuse.css makes with .reuse-page. */
+.guest-body .don-page {
+  padding: var(--s-6) clamp(var(--s-4), 6vw, var(--page-pad));
+}
+
+/* ---------- narrow screens ----------------------------------- */
+@media (max-width: 1100px) {
+  .don-card  { grid-template-columns: 160px minmax(0, 1fr); }
+  .don-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .don-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .don-card { grid-template-columns: minmax(0, 1fr); }
+  .don-card__thumb { height: 120px; }
+  .don-stats, .don-figures, .don-amounts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .don-steps { flex-wrap: wrap; }
+}
