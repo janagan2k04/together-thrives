@@ -80,6 +80,10 @@ class AttendanceController extends Controller
 
         $this->registrations->update((int) $row['id'], ['status' => 'confirmed']);
 
+        // A confirmed volunteer joins the campaign's group chat, when the
+        // organiser left it on (FULL-SYSTEM-PLAN Phase 3, 2026-10).
+        (new \Services\MessagingService())->joinGroup('cleanup', (int) $event['id'], (int) $row['user_id']);
+
         (new Notification())->create([
             'user_id'  => (int) $row['user_id'],
             'title'    => 'Your place is confirmed',

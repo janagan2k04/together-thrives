@@ -3,12 +3,15 @@ namespace Controllers\Cleanup;
 
 use Core\Controller;
 use Core\Database;
+use Core\FileUploader;
 use Core\Request;
 use Core\Session;
 use Models\City;
 use Models\GramaNiladhari;
 use Models\Organization;
 use Models\Cleanup\Attendance;
+use Models\Cleanup\CleanupImpact;
+use Models\Cleanup\EventPhoto;
 use Models\Cleanup\CleanupEvent;
 use Models\Cleanup\EventRegistration;
 use Models\Cleanup\WasteRecord;
@@ -36,9 +39,14 @@ class CleanupEventController extends Controller
 
     /** Fields collected on page 1 of the organiser's form. */
     private const STEP1 = [
-        'title', 'description', 'category', 'event_date', 'start_time', 'end_time',
-        'meeting_point', 'city_id', 'volunteer_limit',
+        'title', 'description', 'category', 'event_date', 'event_end_date',
+        'start_time', 'end_time', 'meeting_point', 'city_id', 'volunteer_limit',
+        'equipment_provided',
     ];
+
+    /** Cover photo: what FileUploader accepts, and how many megabytes. */
+    private const IMAGE_TYPES = ['jpg', 'jpeg', 'png'];
+    private const IMAGE_MB    = 5;
 
     private CleanupEvent $events;
 
@@ -115,36 +123,60 @@ class CleanupEventController extends Controller
             'myAttendance'   => $mine
                 ? (new Attendance())->forRegistration((int) $mine['id'])
                 : null,
+            // The published outcome, once the organiser has written one.
+            'impact'         => (new CleanupImpact())->forEvent((int) $event['id']),
+            'photos'         => (new EventPhoto())->forEvent((int) $event['id']),
+            // The campaign's group chat, when this member is in it.
+            'confirmedBy'    => $this->confirmedBy($event),
+            'groupId'        => is_logged_in()
+                ? (new \Models\Conversation())->groupIdFor('cleanup', (int) $event['id'], (int) auth()['id'])
+                : null,
         ], $this->publicLayout());
     }
 
-    /** The community member's proposal form. */
-    public function create(): void
+    /**
+     * The campaign cover photo, by CAMPAIGN id.
+     *
+     * Not through upload_url(). `FileController` streams a file only to the
+     * account that uploaded it or to an admin, which for a photo on a public
+     * campaign page hides it from every volunteer it is drawn for. Same call
+     * the reuse module made at /reuse/image/{id} and the dengue map at
+     * /dengue/image/{id}.
+     *
+     * A campaign an administrator has not approved is a 404 here for the same
+     * reason its page is - unless the organiser is the one asking, because the
+     * photo has to render on their own detail screen while it waits.
+     */
+    public function image(string $id): void
     {
-        $this->view('cleanup.propose', [
-            'title'     => 'Propose a Cleanup Campaign',
-            'cities'    => (new City())->listWithDistrict(),
-        ]);
+        $event = $this->events->findAny((int) $id);
+        if (!$event || empty($event['cover_image'])) {
+            $this->abort(404);
+        }
+
+        $public = $event['deleted_at'] === null
+            && in_array($event['status'], CleanupEvent::PUBLIC_STATUSES, true);
+
+        if (!$public && !$this->ownsEvent($event)) {
+            $this->abort(404);
+        }
+
+        (new \Controllers\FileController())->stream($event['cover_image']);
     }
 
-    /**
-     * Handles the proposal - and deliberately stores nothing.
-     *
-     * `cleanup_events.organization_id` is NOT NULL and foreign-keyed to
-     * `organizations`, so a campaign proposed by a community member has no owner
-     * under the frozen schema. The group ruled that campaigns stay
-     * organisation-owned rather than inventing a proxy organisation row or
-     * changing the frozen table, so this screen validates the proposal and tells
-     * the member exactly what happens to it. The form itself says the same.
-     */
-    public function store(): void
+    /** Whether the signed-in account may see a campaign that is not public yet. */
+    private function ownsEvent(array $event): bool
     {
-        $this->validate($this->rules());
+        if (!is_logged_in()) {
+            return false;
+        }
+        if (role_is(ROLE_ADMIN)) {
+            return true;
+        }
 
-        Session::flash('info', 'Proposal checked and sent on. A campaign has to be hosted by a '
-            . 'verified organisation, so nothing is stored against your account - an administrator '
-            . 'passes it to an organisation that covers your area.');
-        $this->redirect('/cleanup');
+        $org = (new Organization())->findBy('user_id', (int) auth()['id']);
+
+        return $org !== null && (int) $org['id'] === (int) $event['organization_id'];
     }
 
     // ---------------------------------------------------------------
@@ -174,7 +206,6 @@ class CleanupEventController extends Controller
     public function detail(string $id): void
     {
         $event = $this->ownedOrFail($id);
-        $waste = new WasteRecord();
 
         $this->view('cleanup.detail', [
             'title'      => $event['title'],
@@ -182,34 +213,43 @@ class CleanupEventController extends Controller
             // The five most recent sign-ups; the full table is one click away at
             // /org/cleanup/{id}/volunteers.
             'volunteers' => (new EventRegistration())->forEvent((int) $event['id']),
-            'waste'      => $waste->forEvent((int) $event['id']),
-            'wasteTotal' => $waste->totalFor((int) $event['id']),
+            'waste'      => (new WasteRecord())->forEvent((int) $event['id']),
+            'locked'     => $this->events->isLocked((int) $event['id']),
+            'photos'     => (new EventPhoto())->forEvent((int) $event['id']),
+            'impact'     => (new CleanupImpact())->forEvent((int) $event['id']),
+            'attended'   => (new CleanupImpact())->attendedCount((int) $event['id']),
+            'hasRun'     => ImpactController::lastDay($event) <= date('Y-m-d'),
+            'confirmedBy' => $this->confirmedBy($event),
         ]);
     }
 
     /**
-     * Record a load of collected waste against the campaign.
+     * Record what the campaign collected, in the organiser's own words.
      *
      * The organiser's own screen, so ownedOrFail() is the whole guard. Rows are
      * filed `pending` - the waste is recorded on the day and disposed of later,
      * which is what the ENUM's default means.
+     *
+     * A type and a weight until 2026-09-21. Asking for "Plastic, 40 kg" made
+     * the organiser turn a day's work into a number they had not weighed, and
+     * the panel then totalled those guesses into an impact figure. It is one
+     * description now; `waste_type` and `quantity_kg` stay nullable columns and
+     * keep whatever earlier rows put in them.
      */
     public function storeWaste(string $id): void
     {
         $event = $this->ownedOrFail($id);
 
         $data = $this->validate([
-            'waste_type'  => 'required|max:80',
-            'quantity_kg' => 'required|numeric|min_value:0',
+            'description' => 'required|max:2000',
         ]);
 
         (new WasteRecord())->create([
             'event_id'    => (int) $event['id'],
-            'waste_type'  => $data['waste_type'],
-            'quantity_kg' => $data['quantity_kg'],
+            'description' => $data['description'],
         ]);
 
-        Session::flash('success', 'Waste recorded.');
+        Session::flash('success', 'Recorded.');
         $this->redirect('/org/cleanup/' . $event['id']);
     }
 
@@ -234,14 +274,24 @@ class CleanupEventController extends Controller
         if (Request::post('stage') === 'next') {
             $this->carryToStepTwo(null);
         }
+        if (Request::post('stage') === 'back') {
+            $this->carryBackToStepOne(null);
+        }
 
         $data = $this->validate($this->rules());
 
-        $this->events->create(array_merge($data, [
-            'organization_id'    => (int) $org['id'],
-            'equipment_provided' => $this->postedEquipment(),
-            'status'             => EVENT_DRAFT,
+        $this->scheduleOrBounce($data, null);
+        $data['event_end_date']     = $this->endDateOrBounce($data);
+        $data['equipment_provided'] = ($data['equipment_provided'] ?? '') ?: null;
+        $data['auto_group_chat']    = $this->groupChatChoice();
+
+        $id = (int) $this->events->create(array_merge($data, [
+            'organization_id' => (int) $org['id'],
+            'cover_image'     => $this->draft(null)['cover_upload'] ?? null,
+            'status'          => EVENT_DRAFT,
         ]));
+        // FR7.4 - creation is logged, as the other three modules already did.
+        \Services\Audit::record("Cleanup campaign {$id} created by user " . (int) auth()['id'], 'cleanup_events', $id);
 
         $this->clearDraft(null);
         Session::flash('success', 'Campaign submitted for verification. It becomes visible to '
@@ -252,7 +302,9 @@ class CleanupEventController extends Controller
     /** UPDATE form. */
     public function edit(string $id): void
     {
-        $this->form($this->ownedOrFail($id));
+        $event = $this->ownedOrFail($id);
+        $this->editableOrFail($event);
+        $this->form($event);
     }
 
     /**
@@ -266,17 +318,33 @@ class CleanupEventController extends Controller
     public function update(string $id): void
     {
         $event = $this->ownedOrFail($id);
+        $this->editableOrFail($event);
 
         if (Request::post('stage') === 'next') {
             $this->carryToStepTwo($event);
         }
+        if (Request::post('stage') === 'back') {
+            $this->carryBackToStepOne($event);
+        }
 
         $data = $this->validate($this->rules());
 
+        $this->scheduleOrBounce($data, $event);
+        $data['event_end_date']     = $this->endDateOrBounce($data);
+        $data['equipment_provided'] = ($data['equipment_provided'] ?? '') ?: null;
+        $data['auto_group_chat']    = $this->groupChatChoice();
+
+        // No photo chosen on page 1 means "leave the photo alone", not "remove
+        // it" - writing null unconditionally would drop the cover the first
+        // time the organiser fixed a typo.
+        $cover = $this->draft($event)['cover_upload'] ?? null;
+        if ($cover !== null) {
+            $data['cover_image'] = $cover;
+        }
+
         $this->events->update((int) $event['id'], array_merge($data, [
-            'equipment_provided' => $this->postedEquipment(),
-            'status'             => EVENT_DRAFT,
-            'cancel_reason'      => null,
+            'status'        => EVENT_DRAFT,
+            'cancel_reason' => null,
         ]));
 
         $this->clearDraft($event);
@@ -356,10 +424,62 @@ class CleanupEventController extends Controller
     private function carryToStepTwo(?array $event): never
     {
         $rules = array_intersect_key($this->rules(), array_flip(self::STEP1));
-        $this->validate($rules);
+        $data  = $this->validate($rules);
 
-        Session::set($this->draftKey($event), Request::all());
+        // The dates and times are checked here as well as on the final submit,
+        // so a range that runs backwards is caught on the page it was typed on.
+        $this->scheduleOrBounce($data, $event);
+        $this->endDateOrBounce($data);
+
+        $this->remember($event);
+
+        // The cover photo is chosen on page 1 since 2026-09-25. A file cannot
+        // cross to page 2 as a hidden input, so it is stored now and its path
+        // kept in the draft; the final submit writes that path. Choosing no
+        // file keeps whatever an earlier Next stored.
+        try {
+            $cover = $this->coverImage();
+        } catch (\RuntimeException $e) {
+            Session::flashInput(Request::all(), ['cover_image' => [$e->getMessage()]]);
+            Session::flash('error', 'Please correct the highlighted fields.');
+            $this->back();
+        }
+        if ($cover !== null) {
+            Session::set($this->draftKey($event),
+                array_merge($this->draft($event), ['cover_upload' => $cover]));
+        }
+
         $this->redirect(($event ? '/org/cleanup/' . $event['id'] . '/edit' : '/org/cleanup/create') . '?step=2');
+    }
+
+    /**
+     * Page 2's Back button - a submit since 2026-09-22, item 16 off changes.txt.
+     *
+     * It used to be a link, so going back to fix page 1 (the usual reason: a
+     * date error raised on the final submit) threw away everything typed on
+     * page 2, and Next brought the organiser back to an empty page. Nothing is
+     * validated here - they are leaving a page half done, on purpose.
+     *
+     * The cover photo is on page 1 and was already stored by Next, so it
+     * survives the round trip in the draft.
+     */
+    private function carryBackToStepOne(?array $event): never
+    {
+        $this->remember($event);
+        $this->redirect(($event ? '/org/cleanup/' . $event['id'] . '/edit' : '/org/cleanup/create') . '?step=1');
+    }
+
+    /**
+     * Fold what was just posted into the draft rather than replacing it, so
+     * each page keeps the other's answers.
+     */
+    private function remember(?array $event): void
+    {
+        $posted = Request::all();
+        // Only Next may set the stored photo path - never a posted field.
+        unset($posted['cover_upload']);
+
+        Session::set($this->draftKey($event), array_merge($this->draft($event), $posted));
     }
 
     private function draftKey(?array $event): string
@@ -394,6 +514,11 @@ class CleanupEventController extends Controller
      * `disaster_report_id` was dropped from the form on 2026-09-05 by group
      * decision. The column stays - a report can still be linked by whatever
      * writes one later - but an organiser is no longer asked to pick one.
+     *
+     * `event_end_date` and `waste_plan` joined on 2026-09-21. Both are optional
+     * and both are real columns; the end date is what makes a campaign run over
+     * more than one day, and the waste plan is the organiser saying in their own
+     * words what happens to what is collected.
      */
     private function rules(): array
     {
@@ -402,25 +527,116 @@ class CleanupEventController extends Controller
             'description'        => 'required|max:2000',
             'category'           => 'required|in:' . implode(',', array_keys(CleanupEvent::CATEGORIES)),
             'event_date'         => 'required|date',
+            'event_end_date'     => 'date',
             'start_time'         => 'required',
             'end_time'           => 'required',
             'meeting_point'      => 'required|max:255',
             'city_id'            => 'required|in:' . implode(',', $this->cityIds()),
             'volunteer_limit'    => 'required|integer|min_value:1',
+            'equipment_provided' => 'max:1000',
             'safety_guidelines'  => 'required|max:2000',
+            'waste_plan'         => 'max:2000',
         ];
     }
 
-    /** The ticked equipment boxes, joined into the `equipment_provided` TEXT column. */
-    private function postedEquipment(): ?string
+    /** The officer who confirmed the campaign (Phase 4), with their division. */
+    private function confirmedBy(array $event): ?array
     {
-        $ticked = Request::post('equipment');
-        if (!is_array($ticked) || !$ticked) {
+        if (empty($event['gn_confirmed_by'])) {
+            return null;
+        }
+        return Database::one(
+            'SELECT u.full_name, g.gn_division
+               FROM users u JOIN grama_niladharis g ON g.user_id = u.id
+              WHERE u.id = ? LIMIT 1',
+            [(int) $event['gn_confirmed_by']]
+        ) ?: null;
+    }
+
+    /**
+     * The group chat switch on page 2. An unticked box posts the hidden 0; a
+     * form that never drew the switch posts nothing, which keeps the default.
+     */
+    private function groupChatChoice(): int
+    {
+        return Request::post('auto_group_chat') === '0' ? 0 : 1;
+    }
+
+    /**
+     * An end date is optional, and when given it cannot be before the start.
+     *
+     * The Validator has no "after another field" rule and adding one would mean
+     * editing app/core, which is frozen - so the one comparison this form needs
+     * is made here and flashed the same way a rule failure is. Equal to the
+     * start date is stored as no end date at all: that is a one-day campaign,
+     * and CleanupEvent::dates() would collapse it anyway.
+     *
+     * @return ?string the value to store, or null for a single-day campaign
+     */
+    private function endDateOrBounce(array $data): ?string
+    {
+        $end = trim((string) ($data['event_end_date'] ?? ''));
+        if ($end === '') {
             return null;
         }
 
-        $clean = array_filter(array_map(fn($item) => trim((string) $item), $ticked));
-        return $clean ? implode(', ', $clean) : null;
+        if ($end < $data['event_date']) {
+            Session::flashInput(Request::all(), [
+                'event_end_date' => ['The end date cannot be before the start date.'],
+            ]);
+            Session::flash('error', 'Please correct the highlighted fields.');
+            $this->back();
+        }
+
+        return $end > $data['event_date'] ? $end : null;
+    }
+
+    /**
+     * The two checks the Validator cannot make on the campaign's timing.
+     *
+     * Every day of a campaign runs start time to end time, so an end time at
+     * or before the start is a day of no length - it printed as "-7 hours a
+     * day" on the campaign page. And a new or moved start date cannot be in the
+     * past; a date left as it was is let through, so an organiser can still fix
+     * a typo on a campaign whose day has come.
+     */
+    private function scheduleOrBounce(array $data, ?array $event): void
+    {
+        $errors = [];
+
+        $moved = !$event || $data['event_date'] !== (string) $event['event_date'];
+        if ($moved && $data['event_date'] < date('Y-m-d')) {
+            $errors['event_date'] = ['The start date cannot be in the past.'];
+        }
+
+        if (substr($data['end_time'], 0, 5) <= substr($data['start_time'], 0, 5)) {
+            $errors['end_time'] = ['The end time must be after the start time.'];
+        }
+
+        if ($errors) {
+            Session::flashInput(Request::all(), $errors);
+            Session::flash('error', 'Please correct the highlighted fields.');
+            $this->back();
+        }
+    }
+
+    /**
+     * The cover photo, when one was chosen. Optional on purpose - most
+     * campaigns are posted without one, and refusing to save because a
+     * photograph is missing helps nobody.
+     *
+     * Stored BEFORE the row is written, so a rejected file throws while there
+     * is nothing in the database to clean up. Same call the dengue alert screen
+     * made on 2026-09-18.
+     */
+    private function coverImage(): ?string
+    {
+        $file = Request::file('cover_image');
+        if (!$file) {
+            return null;
+        }
+
+        return FileUploader::store($file, 'events', self::IMAGE_TYPES, self::IMAGE_MB);
     }
 
     private function cityIds(): array
@@ -495,6 +711,15 @@ class CleanupEventController extends Controller
             'description' => 'Cleanup and volunteering campaigns hosted by this Grama Niladhari division.',
             'verified_at' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    /** A campaign volunteers have joined is fixed - they joined it as it stood. */
+    private function editableOrFail(array $event): void
+    {
+        if ($this->events->isLocked((int) $event['id'])) {
+            Session::flash('error', 'Volunteers have already registered for this campaign, so it can no longer be edited.');
+            $this->redirect('/org/cleanup/' . $event['id']);
+        }
     }
 
     /**

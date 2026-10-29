@@ -8,6 +8,7 @@ use Models\Cleanup\Attendance;
 use Models\Cleanup\CleanupEvent;
 use Models\Cleanup\EventRegistration;
 use Models\Notification;
+use Services\Nic;
 
 /**
  * Volunteer sign-up for a cleanup campaign - the "Join Campaign" frame.
@@ -30,6 +31,12 @@ use Models\Notification;
  * Skills are one free-text line as of 2026-09-05, not a fixed checkbox list:
  * `event_registrations.skills` is a VARCHAR, and no five-item list covers what a
  * volunteer can actually offer.
+ *
+ * A campaign with an `event_end_date` runs over several days, and the volunteer
+ * says which of them they can come on - 2026-09-21, item 7 off changes.txt. The
+ * days are checked against the campaign's OWN dates before they are stored, so
+ * a tampered checkbox cannot register somebody for a day the campaign does not
+ * run. A one-day campaign asks nothing and stores NULL.
  */
 class VolunteerController extends Controller
 {
@@ -85,12 +92,20 @@ class VolunteerController extends Controller
             'skills'                  => 'max:255',
         ]);
 
+        // The birth-year check nic_lk cannot make - Services\Nic, 2026-09-22.
+        if ($problem = Nic::problem($data['nic'])) {
+            Session::flashInput(Request::all(), ['nic' => [$problem]]);
+            Session::flash('error', 'Please correct the highlighted fields.');
+            $this->back();
+        }
+
         $skills = trim((string) ($data['skills'] ?? ''));
 
         $row = [
             'emergency_contact_name'  => $data['emergency_contact_name'],
             'emergency_contact_phone' => $data['emergency_contact_phone'],
             'skills'                  => $skills !== '' ? $skills : null,
+            'attend_dates'            => $this->attendDatesOrBounce($event),
             'status'                  => 'pending',
         ];
 
@@ -156,6 +171,7 @@ class VolunteerController extends Controller
         }
 
         $this->registrations->update((int) $registration['id'], ['status' => 'cancelled']);
+        (new \Services\MessagingService())->leaveGroup('cleanup', (int) $event['id'], (int) auth()['id']);
 
         $this->notifyOrganiserOfLeaving($event);
 
@@ -175,6 +191,41 @@ class VolunteerController extends Controller
         $this->redirect(Request::post('from') === 'activities'
             ? '/my/activities'
             : '/cleanup/' . $id);
+    }
+
+    /**
+     * The days this volunteer ticked, kept only if the campaign really runs on
+     * them.
+     *
+     * `array_intersect` against CleanupEvent::dates() is the whole guard: the
+     * checkboxes come from the browser and a posted date the campaign does not
+     * run on would otherwise be stored and then shown to the organiser as a
+     * day somebody is coming.
+     *
+     * A multi-day campaign with nothing ticked bounces rather than silently
+     * registering the volunteer for every day - which of the two they meant is
+     * not something to guess. A one-day campaign has no question to answer, so
+     * it stores NULL whatever was posted.
+     */
+    private function attendDatesOrBounce(array $event): ?string
+    {
+        if (!CleanupEvent::isMultiDay($event)) {
+            return null;
+        }
+
+        $posted = Request::post('attend_dates');
+        $posted = is_array($posted) ? array_map('strval', $posted) : [];
+        $valid  = array_intersect(CleanupEvent::dates($event), $posted);
+
+        if (!$valid) {
+            Session::flashInput(Request::all(), [
+                'attend_dates' => ['Choose at least one day you can come.'],
+            ]);
+            Session::flash('error', 'Please correct the highlighted fields.');
+            $this->back();
+        }
+
+        return EventRegistration::packDates($valid);
     }
 
     /**

@@ -3,9 +3,9 @@ namespace Controllers\Cleanup;
 
 use Core\Controller;
 use Models\Certificate;
+use Models\Cleanup\Attendance;
 use Models\Cleanup\CleanupEvent;
 use Models\Cleanup\EventRegistration;
-use Models\Cleanup\WasteRecord;
 
 /**
  * The volunteer appreciation certificate issued after a campaign.
@@ -14,8 +14,8 @@ use Models\Cleanup\WasteRecord;
  * A4 landscape sheet meant to be printed or saved.
  *
  * A certificate is a claim that this person volunteered at this campaign, so it
- * is not handed to anyone who reaches the URL: the member must have a live
- * registration. Opening the sheet issues the `certificates` row if it does not
+ * is not handed to anyone who reaches the URL: the member must have been
+ * checked in by the organiser. Opening the sheet issues the `certificates` row if it does not
  * exist yet, which is what fixes the number - print it today and again next year
  * and both copies carry the same id.
  *
@@ -35,12 +35,16 @@ class CertificateController extends Controller
 
         $userId = (int) auth()['id'];
 
-        if (!(new EventRegistration())->forUserAndEvent($userId, (int) $event['id'])) {
-            $this->abort(403, 'Certificates are issued to volunteers who joined the campaign.');
+        // FR3.10: issued from a recorded attendance. Signing up is not taking
+        // part - until 2026-10 any live registration opened the sheet, which
+        // certified people the organiser never checked in.
+        $registration = (new EventRegistration())->forUserAndEvent($userId, (int) $event['id']);
+        if (!$registration || $registration['status'] === 'cancelled'
+            || !(new Attendance())->isCheckedIn((int) $registration['id'])) {
+            $this->abort(403, 'Certificates are issued to volunteers the organiser checked in.');
         }
 
-        $row   = (new Certificate())->issue($userId, 'event_id', (int) $event['id'], 'TT-CL');
-        $waste = (new WasteRecord())->totalFor((int) $event['id']);
+        $row = (new Certificate())->issue($userId, 'event_id', (int) $event['id'], 'TT-CL');
 
         $this->view('cleanup.certificate', [
             'title'       => 'Certificate of Appreciation',
@@ -53,9 +57,6 @@ class CertificateController extends Controller
                 'date'       => format_date($event['event_date']),
                 'issued'     => format_date($row['issued_at'] ?? date('Y-m-d')),
                 'hours'      => rtrim(rtrim((string) $event['duration_hours'], '0'), '.') . ' hours',
-                'waste'      => $waste > 0
-                    ? rtrim(rtrim(number_format($waste, 2), '0'), '.') . ' kg'
-                    : 'Not recorded',
                 'volunteers' => (int) $event['checked_in'],
             ],
         ], 'blank');
