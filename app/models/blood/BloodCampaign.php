@@ -58,6 +58,14 @@ class BloodCampaign extends Model
     /** The statuses a donor is allowed to see on the public hub. */
     public const PUBLIC_STATUSES = [EVENT_PUBLISHED, EVENT_ONGOING];
 
+    /**
+     * What /blood/{id} will open: the public statuses plus a completed camp,
+     * so donors can read its published outcome (2026-10). Joining and the
+     * screening form still check PUBLIC_STATUSES, so a completed camp takes no
+     * registrations, and the hub does not list it.
+     */
+    public const READABLE_STATUSES = [EVENT_PUBLISHED, EVENT_ONGOING, EVENT_COMPLETED];
+
     // ---------- public browse ----------
 
     /**
@@ -146,6 +154,21 @@ class BloodCampaign extends Model
     public function findAny(int $id): ?array
     {
         return Database::one('SELECT * FROM blood_campaigns WHERE id = ? LIMIT 1', [$id]);
+    }
+
+    /**
+     * True once a donor has answered this camp's screening form - which is
+     * how a donor registers - or a donation has been recorded against it.
+     * They signed up to the camp as it stood, so it can no longer be edited.
+     */
+    public function isLocked(int $id): bool
+    {
+        return (bool) Database::value(
+            'SELECT EXISTS (SELECT 1 FROM screening_responses WHERE campaign_id = ?)
+                 OR EXISTS (SELECT 1 FROM blood_donation_records
+                             WHERE campaign_id = ? AND deleted_at IS NULL)',
+            [$id, $id]
+        );
     }
 
     // ---------- the organiser's own list ----------

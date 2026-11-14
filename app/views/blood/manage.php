@@ -85,7 +85,7 @@ $dates = static function (array $r): string {
                 <div class="camp-cell__body">
                   <h3>
                     <?= e($r['title']) ?>
-                    <span class="countdown countdown--blue">BLOOD DONATION</span>
+                    <span class="countdown countdown--red">BLOOD DONATION</span>
                   </h3>
                   <span class="camp-cell__where">
                     <?= icon('map-pin') ?><?= e($r['venue']) ?><?= $r['address'] ? ', ' . e($r['address']) : '' ?>, <?= e($r['city']) ?>

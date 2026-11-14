@@ -176,7 +176,7 @@ $checks = [
             </div>
             <div class="field <?= has_error('campaign_end_date') ? 'field--invalid' : '' ?>">
               <label class="field__label" for="campaign_end_date">End Date *</label>
-              <input class="field__input" id="campaign_end_date" name="campaign_end_date" type="date"
+              <input class="field__input" id="campaign_end_date" name="campaign_end_date" type="date" data-date-after="campaign_date"
                      value="<?= old('campaign_end_date', $row['campaign_end_date'] ?? '') ?>">
               <span class="field__error"><?= error_for('campaign_end_date') ?></span>
               <span class="field__hint">Same as the start date for a one-day camp.</span>
@@ -192,7 +192,7 @@ $checks = [
             </div>
             <div class="field <?= has_error('end_time') ? 'field--invalid' : '' ?>">
               <label class="field__label" for="end_time">Time To *</label>
-              <input class="field__input" id="end_time" name="end_time" type="time"
+              <input class="field__input" id="end_time" name="end_time" type="time" data-time-after="start_time"
                      value="<?= old('end_time', $timeValue($row['end_time'] ?? null)) ?>">
               <span class="field__error"><?= error_for('end_time') ?></span>
             </div>
@@ -207,15 +207,11 @@ $checks = [
           <div><strong>Donor Screening &amp; Communication</strong><small>Donors complete this form when they tap Join.</small></div>
         </div>
         <div class="sec__body">
-          <div class="field">
-            <label class="field__label" for="screening_form">Medical Screening Form</label>
-            <select class="field__select" id="screening_form" name="screening_form">
-              <option>Standard Screening Form (14 questions)</option>
-            </select>
-            <span class="field__hint">
-              The fourteen defaults live in <code>screening_questions</code>. Per-campaign question
-              sets are a later job.
-            </span>
+          <div class="switch-row">
+            <div class="switch-row__text">
+              <strong>Medical screening form</strong>
+              <small>Donors answer the standard questions. You can add your own on the campaign page until the first donor registers.</small>
+            </div>
           </div>
 
           <?php /*
