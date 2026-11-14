@@ -48,7 +48,7 @@ $published = $row['status'] === EVENT_PUBLISHED || $row['status'] === EVENT_ONGO
   <div class="blood-head__text">
     <h1>
       <?= e($row['title']) ?>
-      <span class="countdown countdown--blue">BLOOD DONATION</span>
+      <span class="countdown countdown--red">BLOOD DONATION</span>
       <span class="pill pill--<?= e($tones[$row['status']]) ?>"><?= e($statuses[$row['status']]) ?></span>
     </h1>
     <p>
@@ -59,7 +59,12 @@ $published = $row['status'] === EVENT_PUBLISHED || $row['status'] === EVENT_ONGO
   </div>
   <div class="page-head__actions">
     <?php if (!$cancelled): ?>
-      <a class="btn btn--outline" href="<?= url('/my/blood/' . $row['id'] . '/edit') ?>">Edit</a>
+      <?php if ((int) $row['auto_group_chat'] && in_array($row['status'], [EVENT_PUBLISHED, EVENT_ONGOING, EVENT_COMPLETED], true)): ?>
+        <a class="btn btn--outline" href="<?= url('/my/blood/' . $row['id'] . '/chat') ?>">Group Chat</a>
+      <?php endif; ?>
+      <?php if (!$locked): ?>
+        <a class="btn btn--outline" href="<?= url('/my/blood/' . $row['id'] . '/edit') ?>">Edit</a>
+      <?php endif; ?>
       <form method="post" action="<?= url('/my/blood/' . $row['id']) ?>" class="inline">
         <?= csrf_field() ?><?= method_field('DELETE') ?>
         <button class="btn btn--danger" data-confirm="Cancel this campaign?">Cancel Campaign</button>
@@ -114,9 +119,116 @@ $published = $row['status'] === EVENT_PUBLISHED || $row['status'] === EVENT_ONGO
           </div>
           <div class="readout">
             <span class="readout__label">Screening form</span>
-            <span class="readout__value">Standard · 14 questions</span>
+            <span class="readout__value"><?= e(count($defaultQuestions) + count($ownQuestions)) ?> questions</span>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="sec" id="outcome">
+      <div class="sec__head">
+        <div class="sec__spacer">
+          <strong>Camp Outcome</strong>
+          <small>
+            <?php if ($impact): ?>Published <?= e(format_date($impact['published_at'])) ?>
+            <?php else: ?>Tell donors what the camp achieved. Publishing completes the camp.<?php endif; ?>
+          </small>
+        </div>
+      </div>
+      <div class="sec__body">
+        <?php if ($cancelled || !in_array($row['status'], [EVENT_PUBLISHED, EVENT_ONGOING, EVENT_COMPLETED], true)): ?>
+          <p class="muted">An outcome can be published once the camp is approved and has taken place.</p>
+        <?php elseif (!$hasRun): ?>
+          <p class="muted">You can publish the outcome from <?= e(format_date($row['campaign_end_date'] ?: $row['campaign_date'])) ?>, once the camp has taken place.</p>
+        <?php else: ?>
+          <div class="readout-grid">
+            <div class="readout">
+              <span class="readout__label">Donations recorded</span>
+              <span class="readout__value"><?= e($totals['donors']) ?></span>
+            </div>
+            <div class="readout">
+              <span class="readout__label">Units</span>
+              <span class="readout__value"><?= e(rtrim(rtrim(number_format((float) $totals['units'], 2), '0'), '.')) ?></span>
+            </div>
+          </div>
+          <form method="post" action="<?= url('/my/blood/' . $row['id'] . '/impact') ?>" class="stack" style="margin-top:var(--s-4)">
+            <?= csrf_field() ?>
+            <div class="field <?= has_error('summary') ? 'field--invalid' : '' ?>">
+              <label class="field__label" for="summary">What the camp achieved</label>
+              <textarea class="field__textarea" id="summary" name="summary" maxlength="2000"
+                        placeholder="Turnout, what the units will be used for, thanks to donors…"><?= old('summary', $impact['summary'] ?? '') ?></textarea>
+              <span class="field__error"><?= error_for('summary') ?></span>
+            </div>
+            <button class="btn btn--primary" type="submit" style="align-self:flex-start"
+                    <?= $impact ? '' : 'data-confirm="Publish the outcome? The camp is marked complete and registered donors are told."' ?>>
+              <?= $impact ? 'Update outcome' : 'Publish outcome' ?>
+            </button>
+          </form>
+        <?php endif; ?>
+      </div>
+    </section>
+
+    <section class="sec" id="questions">
+      <div class="sec__head">
+        <div class="sec__spacer">
+          <strong>Screening Questions</strong>
+          <small>Donors answer every one of these when they register. A donor who gives the deferring answer is not eligible.</small>
+        </div>
+      </div>
+      <div class="sec__body">
+        <table class="donor-table">
+          <thead><tr><th>Question</th><th>Defers on</th><th></th></tr></thead>
+          <tbody>
+            <?php foreach ($defaultQuestions as $q): ?>
+              <tr>
+                <td><?= e($q['question']) ?></td>
+                <td><?= e(ucfirst((string) $q['disqualifying_answer'])) ?></td>
+                <td><span class="muted">Standard</span></td>
+              </tr>
+            <?php endforeach; ?>
+            <?php foreach ($ownQuestions as $q): ?>
+              <tr>
+                <td><?= e($q['question']) ?></td>
+                <td><?= e(ucfirst((string) $q['disqualifying_answer'])) ?></td>
+                <td>
+                  <?php if (!$locked && !$cancelled): ?>
+                    <form method="post" class="inline"
+                          action="<?= url('/my/blood/' . $row['id'] . '/questions/' . $q['id']) ?>">
+                      <?= csrf_field() ?><?= method_field('DELETE') ?>
+                      <button class="btn-mini btn-mini--danger" data-confirm="Remove this question?">Remove</button>
+                    </form>
+                  <?php else: ?>
+                    <span class="muted">Yours</span>
+                  <?php endif; ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+
+        <?php if (!$locked && !$cancelled): ?>
+          <form method="post" action="<?= url('/my/blood/' . $row['id'] . '/questions') ?>"
+                class="stack" style="margin-top:var(--s-5)">
+            <?= csrf_field() ?>
+            <div class="field <?= has_error('question') ? 'field--invalid' : '' ?>">
+              <label class="field__label" for="question">Add a yes/no question</label>
+              <input class="field__input" id="question" name="question" maxlength="255"
+                     value="<?= old('question') ?>" placeholder="e.g. Have you had a tattoo in the last 6 months?">
+              <span class="field__error"><?= error_for('question') ?></span>
+            </div>
+            <div class="field <?= has_error('disqualifying_answer') ? 'field--invalid' : '' ?>">
+              <label class="field__label" for="disqualifying_answer">A donor is deferred if they answer</label>
+              <select class="field__select" id="disqualifying_answer" name="disqualifying_answer">
+                <option value="yes" <?= old('disqualifying_answer') === 'yes' ? 'selected' : '' ?>>Yes</option>
+                <option value="no"  <?= old('disqualifying_answer') === 'no' ? 'selected' : '' ?>>No</option>
+              </select>
+              <span class="field__error"><?= error_for('disqualifying_answer') ?></span>
+            </div>
+            <button class="btn btn--primary" type="submit" style="align-self:flex-start">Add question</button>
+          </form>
+        <?php elseif ($locked): ?>
+          <p class="muted" style="margin-top:var(--s-4)">Donors have registered, so the questions are fixed.</p>
+        <?php endif; ?>
       </div>
     </section>
 
@@ -207,38 +319,6 @@ $published = $row['status'] === EVENT_PUBLISHED || $row['status'] === EVENT_ONGO
             </small>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="sec">
-      <div class="sec__head">
-        <div><strong>Post-Campaign Impact</strong><small>Publish outcomes once the campaign has ended.</small></div>
-      </div>
-      <div class="sec__body">
-        <?php
-        /*
-         * Counted from `blood_donation_records`, so these are 0 until the
-         * organiser records a donation on the table above. "Lives supported" is
-         * three per unit - the figure a whole-blood donation splits into - which
-         * is a stated multiple of something counted, not an invented number.
-         */
-        $units = array_sum(array_map(fn($d) => (float) $d['units'], $donated));
-        ?>
-        <div class="impact-boxes">
-          <div>
-            <strong><?= e(rtrim(rtrim(number_format($units, 2), '0'), '.')) ?></strong>
-            <small>Units collected</small>
-          </div>
-          <div><strong><?= e(count($donated)) ?></strong><small>Donors attended</small></div>
-          <div><strong><?= e((int) round($units * 3)) ?></strong><small>Lives supported</small></div>
-        </div>
-
-        <?php if (!$donated): ?>
-          <div class="alert alert--info" style="margin-top:var(--s-4)">
-            Record each donation against its donor on the Registered Donors table, and these
-            figures follow.
-          </div>
-        <?php endif; ?>
       </div>
     </section>
   </div>

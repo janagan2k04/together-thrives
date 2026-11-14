@@ -5,8 +5,10 @@ use Core\Controller;
 use Core\Request;
 use Core\Session;
 use Models\Blood\BloodCampaign;
+use Models\Blood\BloodImpact;
 use Models\Blood\CriticalRequest;
 use Models\Blood\DonationRecord;
+use Models\Blood\ScreeningQuestion;
 use Models\Blood\ScreeningResponse;
 use Models\City;
 use Models\Notification;
@@ -147,7 +149,7 @@ class BloodCampaignController extends Controller
     public function show(string $id): void
     {
         $camp = $this->campaigns->findDetail((int) $id);
-        if (!$camp || !in_array($camp['status'], BloodCampaign::PUBLIC_STATUSES, true)) {
+        if (!$camp || !in_array($camp['status'], BloodCampaign::READABLE_STATUSES, true)) {
             // A camp still awaiting approval is not public, but its organiser
             // reads it on their own screen at /my/blood/{id}.
             $this->abort(404, 'Blood donation camp not found.');
@@ -157,6 +159,13 @@ class BloodCampaignController extends Controller
             'title'     => $camp['title'],
             'camp'      => $camp,
             'organiser' => $this->campaigns->organiserStats((int) $camp['organizer_id']),
+            // The published outcome, and what was recorded at the camp.
+            'impact'    => (new BloodImpact())->forCampaign((int) $camp['id']),
+            'totals'    => (new BloodImpact())->totals((int) $camp['id']),
+            // The camp's group chat, when this donor is in it.
+            'groupId'   => is_logged_in()
+                ? (new \Models\Conversation())->groupIdFor('blood', (int) $camp['id'], (int) auth()['id'])
+                : null,
         ], $this->publicLayout());
     }
 
@@ -213,6 +222,14 @@ class BloodCampaignController extends Controller
             // does not - see ScreeningResponse::donorsFor().
             'donors'   => $this->screenings->donorsFor((int) $row['id']),
             'donated'  => $this->donations->forCampaign((int) $row['id']),
+            'locked'   => $this->campaigns->isLocked((int) $row['id']),
+            // The platform defaults and the organiser's own, apart, so the
+            // screen can offer Remove only on the second.
+            'defaultQuestions' => (new ScreeningQuestion())->formFor(null),
+            'ownQuestions'     => (new ScreeningQuestion())->ownFor((int) $row['id']),
+            'impact'           => (new BloodImpact())->forCampaign((int) $row['id']),
+            'totals'           => (new BloodImpact())->totals((int) $row['id']),
+            'hasRun'           => ImpactController::lastDay($row) <= date('Y-m-d'),
         ]);
     }
 
@@ -237,6 +254,8 @@ class BloodCampaignController extends Controller
         $data['status'] = MOD_PENDING;
 
         $id = $this->campaigns->create($data);
+        // FR7.4 - creation is logged, as the other modules already did.
+        \Services\Audit::record("Blood campaign {$id} created by user " . (int) auth()['id'], 'blood_campaigns', (int) $id);
 
         Session::flash('success', 'Campaign submitted. An administrator reviews it before donors are notified.');
         $this->redirect('/my/blood/' . $id);
@@ -246,13 +265,16 @@ class BloodCampaignController extends Controller
 
     public function edit(string $id): void
     {
-        $this->form($this->ownedOrFail((int) $id));
+        $row = $this->ownedOrFail((int) $id);
+        $this->editableOrFail($row);
+        $this->form($row);
     }
 
     public function update(string $id): void
     {
         $row  = $this->ownedOrFail((int) $id);
-        $data = $this->validateCampaign();
+        $this->editableOrFail($row);
+        $data = $this->validateCampaign($row);
 
         $data['auto_group_chat'] = Request::post('auto_group_chat') ? 1 : 0;
 
@@ -328,7 +350,7 @@ class BloodCampaignController extends Controller
      * it rather than faking it - the same call the group made on the week 2
      * registration forms. Adding it needs a schema change and a group decision.
      */
-    private function validateCampaign(): array
+    private function validateCampaign(?array $row = null): array
     {
         $cityIds = implode(',', array_column($this->cities->listAll(), 'id'));
 
@@ -352,6 +374,15 @@ class BloodCampaignController extends Controller
         //
         // A single-day camp is normal, so the end DATE may equal the start;
         // the end TIME may not, or the camp lasts no time at all.
+        // A new or moved start date cannot be in the past. One left as it was
+        // is let through, so a typo can still be fixed once the day has come.
+        $moved = !$row || $data['campaign_date'] !== (string) $row['campaign_date'];
+        if ($moved && $data['campaign_date'] < date('Y-m-d')) {
+            Session::flashInput($data, ['campaign_date' => ['The start date cannot be in the past.']]);
+            Session::flash('error', 'Please correct the highlighted fields.');
+            $this->back();
+        }
+
         if ($data['campaign_end_date'] < $data['campaign_date']) {
             Session::flashInput($data, ['campaign_end_date' => ['The end date cannot be before the start date.']]);
             Session::flash('error', 'Please correct the highlighted fields.');
@@ -421,6 +452,15 @@ class BloodCampaignController extends Controller
     // ---------------------------------------------------------------
     // Guards
     // ---------------------------------------------------------------
+
+    /** A camp donors have registered for is fixed - they signed up to it as it stood. */
+    private function editableOrFail(array $row): void
+    {
+        if ($this->campaigns->isLocked((int) $row['id'])) {
+            Session::flash('error', 'Donors have already registered for this campaign, so it can no longer be edited.');
+            $this->redirect('/my/blood/' . $row['id']);
+        }
+    }
 
     /**
      * Load a campaign the caller is allowed to read and change. Never trust the

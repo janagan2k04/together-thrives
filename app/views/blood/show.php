@@ -25,7 +25,6 @@ $dates = static function (array $r): string {
 
 $registered = (int) $camp['registered'];
 $target     = (int) $camp['target_donors'];
-$pct        = $target > 0 ? min(100, (int) round($registered / $target * 100)) : 0;
 $remaining  = max(0, $target - $registered);
 
 // Days until the camp, for the chip in the corner.
@@ -76,6 +75,27 @@ $before = [
 
   <div class="split">
     <div class="stack">
+
+      <?php if ($impact): ?>
+        <section class="sec">
+          <div class="sec__head">
+            <div><strong>Camp Outcome</strong><small>Published <?= e(format_date($impact['published_at'])) ?></small></div>
+          </div>
+          <div class="sec__body">
+            <p><?= nl2br(e($impact['summary'])) ?></p>
+            <div class="readout-grid" style="margin-top:var(--s-4)">
+              <div class="readout">
+                <span class="readout__label">Donors</span>
+                <span class="readout__value"><?= e($totals['donors']) ?></span>
+              </div>
+              <div class="readout">
+                <span class="readout__label">Units collected</span>
+                <span class="readout__value"><?= e(rtrim(rtrim(number_format((float) $totals['units'], 2), '0'), '.')) ?></span>
+              </div>
+            </div>
+          </div>
+        </section>
+      <?php endif; ?>
 
       <section class="sec">
         <div class="sec__head">
@@ -148,10 +168,16 @@ $before = [
               of <?= e($target) ?> registered
             </span>
           </p>
-          <div class="progress" style="margin-top:10px"><span class="progress__bar" style="width:<?= e($pct) ?>%"></span></div>
           <p class="progress-note"><?= e($remaining) ?> slots remaining</p>
 
-          <?php if (is_logged_in()): ?>
+          <?php if ($groupId): ?>
+            <a class="btn btn--outline btn--block" style="margin-top:var(--s-4)"
+               href="<?= url('/messages/' . $groupId) ?>">Open group chat</a>
+          <?php endif; ?>
+
+          <?php if ($camp['status'] === EVENT_COMPLETED): ?>
+            <p class="muted" style="margin-top:var(--s-4)">This camp has finished.</p>
+          <?php elseif (is_logged_in()): ?>
             <form method="post" action="<?= url('/blood/' . $camp['id'] . '/join') ?>" style="margin-top:var(--s-4)">
               <?= csrf_field() ?>
               <button class="btn btn--blood btn--block" type="submit">Join This Camp</button>
@@ -199,9 +225,10 @@ $before = [
   </div>
 
   <div class="form-foot">
-    <p>You will receive a confirmation email and camp reminders after registering.</p>
+    <p>Your registration and any camp update reach you through the notification bell.</p>
     <a class="btn btn--outline" href="<?= url('/blood') ?>">Cancel</a>
-    <?php if (is_logged_in()): ?>
+    <?php if ($camp['status'] === EVENT_COMPLETED): ?>
+    <?php elseif (is_logged_in()): ?>
       <form method="post" action="<?= url('/blood/' . $camp['id'] . '/join') ?>" class="inline">
         <?= csrf_field() ?>
         <button class="btn btn--blood" type="submit">Join This Camp</button>
